@@ -1,0 +1,94 @@
+import type { TranscriptData } from '@/domain/transcript';
+import { describeError } from '@/shared/errors';
+import type { AudioBubble } from './whatsapp-bubble-scanner';
+
+export const INJECTED_UI_CLASS = 'wa2t-ui';
+
+export type TranscribeHandler = (bubble: AudioBubble) => Promise<TranscriptData>;
+
+const WHATSAPP_GREEN = '#00a884';
+
+/**
+ * The injected "Transcrever" control plus its result, styled to blend into the
+ * WhatsApp balloon: it inherits the bubble's text color (so it works in light and
+ * dark themes) and sits under a subtle divider. Once a transcript arrives the
+ * button is replaced by the text, so the bubble reads like a native caption.
+ */
+export class TranscribeButton {
+  private readonly bubble: AudioBubble;
+  private readonly onTranscribe: TranscribeHandler;
+  private readonly root: HTMLDivElement;
+  private readonly button: HTMLButtonElement;
+  private readonly output: HTMLDivElement;
+  private busy = false;
+
+  constructor(bubble: AudioBubble, onTranscribe: TranscribeHandler) {
+    this.bubble = bubble;
+    this.onTranscribe = onTranscribe;
+    this.handleClick = this.handleClick.bind(this);
+
+    // Fill the audio widget's width (it's a fixed, narrow block sitting on the
+    // balloon), so the caption wraps at the bubble width instead of the pane.
+    this.root = document.createElement('div');
+    this.root.className = INJECTED_UI_CLASS;
+    this.root.style.cssText =
+      'width:100%;flex:1 0 100%;box-sizing:border-box;margin-top:5px;padding-top:5px;' +
+      'border-top:1px solid rgba(134,150,160,.18);display:flex;flex-direction:column;gap:5px;';
+
+    this.button = document.createElement('button');
+    this.button.type = 'button';
+    this.button.textContent = 'Transcrever';
+    this.button.style.cssText =
+      `align-self:flex-start;padding:3px 11px;border:none;border-radius:14px;background:${WHATSAPP_GREEN};` +
+      'color:#fff;font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;';
+    this.button.addEventListener('click', this.handleClick);
+
+    // Inherits the balloon's text color; slightly muted so it reads as a caption.
+    this.output = document.createElement('div');
+    this.output.style.cssText = 'font-size:13.5px;line-height:1.4;color:inherit;opacity:.92;';
+
+    this.root.append(this.button, this.output);
+  }
+
+  mount(parent: HTMLElement): void {
+    parent.appendChild(this.root);
+  }
+
+  private async handleClick(): Promise<void> {
+    if (this.busy) {
+      return;
+    }
+
+    this.setBusy(true);
+    this.button.textContent = 'Transcrevendo…';
+    this.output.textContent = '';
+
+    try {
+      const transcript = await this.onTranscribe(this.bubble);
+      this.renderTranscript(transcript.text);
+    } catch (error) {
+      this.button.textContent = 'Transcrever';
+      this.output.textContent = `⚠ ${describeError(error)}`;
+    } finally {
+      this.setBusy(false);
+    }
+  }
+
+  private renderTranscript(text: string): void {
+    this.button.style.display = 'none';
+    this.output.textContent = this.flatten(text) || '(sem fala detectada)';
+  }
+
+  private flatten(text: string): string {
+    return text
+      .replace(/\s*\n\s*/g, ' ')
+      .replace(/[ \t]+/g, ' ')
+      .trim();
+  }
+
+  private setBusy(busy: boolean): void {
+    this.busy = busy;
+    this.button.disabled = busy;
+    this.button.style.opacity = busy ? '0.6' : '1';
+  }
+}

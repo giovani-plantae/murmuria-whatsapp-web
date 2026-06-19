@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transcrição local (piloto)</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          sans-serif;
+      }
+      body {
+        width: 320px;
+        margin: 0;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      h1 {
+        font-size: 14px;
+        margin: 0;
+      }
+      button {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        background: #128c7e;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: progress;
+      }
+      #status {
+        font-size: 12px;
+        opacity: 0.8;
+        min-height: 16px;
+      }
+      #transcript {
+        font-size: 13px;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        border-left: 3px solid #128c7e;
+        padding-left: 8px;
+        min-height: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>WhatsApp Audio → Texto (piloto)</h1>
+    <input id="audio-file" type="file" accept="audio/*" />
+    <button id="transcribe-button" type="button">Transcrever</button>
+    <div id="status"></div>
+    <div id="transcript"></div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

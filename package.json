@@ -1,0 +1,49 @@
+{
+  "name": "murmuria-whatsapp-web",
+  "version": "0.0.1",
+  "description": "Browser extension (MV3) that transcribes WhatsApp Web voice messages locally, using the local murmuria transcription server.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giovani-plantae/murmuria-whatsapp-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/giovani-plantae/murmuria-whatsapp-web/issues"
+  },
+  "homepage": "https://github.com/giovani-plantae/murmuria-whatsapp-web#readme",
+  "keywords": [
+    "murmuria",
+    "transcription",
+    "speech-to-text",
+    "whatsapp",
+    "browser-extension",
+    "manifest-v3",
+    "wxt"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "postinstall": "wxt prepare",
+    "dev": "wxt",
+    "build": "wxt build",
+    "zip": "wxt zip",
+    "compile": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/chrome": "^0.1.42",
+    "@types/node": "^25.9.1",
+    "happy-dom": "^20.9.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0",
+    "wxt": "^0.19.0"
+  }
+}

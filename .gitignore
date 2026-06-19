@@ -1,0 +1,10 @@
+node_modules/
+.output/
+.wxt/
+stats.html
+
+# Local test/debug artifacts and browser profiles — never committed
+test-results/
+playwright-report/
+.pw-profile/
+.wa-profile/
