@@ -1,10 +1,16 @@
 import { AudioDecoder } from '@/services/audio/audio-decoder';
 import { isAddressedTo, isTranscribeRequest } from '@/services/messaging/messages';
 import type { TranscribeRequest, TranscribeResponse } from '@/services/messaging/messages';
+import { MurmuriaTranscriptionService } from '@/services/transcription/murmuria-transcription-service';
 import {
-  MURMURIA_ENDPOINT,
-  MurmuriaTranscriptionService,
-} from '@/services/transcription/murmuria-transcription-service';
+  BrowserEndpointStore,
+  MurmuriaDiscoveryService,
+} from '@/services/transcription/murmuria-discovery-service';
+import {
+  DEFAULT_MURMURIA_HOSTS,
+  DEFAULT_MURMURIA_PORTS,
+  DISCOVERY_PROBE_TIMEOUT_MS,
+} from '@/services/transcription/murmuria-discovery-config';
 import { TranscriptionCoordinator } from '@/services/transcription/transcription-coordinator';
 import { DEFAULT_TRANSCRIPTION_CONFIG } from '@/services/transcription/transcription-config';
 import { describeError } from '@/shared/errors';
@@ -22,7 +28,13 @@ class OffscreenHost {
     this.coordinator = new TranscriptionCoordinator({
       decoder: new AudioDecoder(),
       transcriber: new MurmuriaTranscriptionService({
-        endpoint: MURMURIA_ENDPOINT,
+        discovery: new MurmuriaDiscoveryService({
+          hosts: DEFAULT_MURMURIA_HOSTS,
+          ports: DEFAULT_MURMURIA_PORTS,
+          probeTimeoutMs: DISCOVERY_PROBE_TIMEOUT_MS,
+          store: new BrowserEndpointStore(),
+          fetch: globalThis.fetch.bind(globalThis),
+        }),
         language: DEFAULT_TRANSCRIPTION_CONFIG.language,
       }),
     });

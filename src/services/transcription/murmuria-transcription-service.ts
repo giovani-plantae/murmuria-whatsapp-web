@@ -1,29 +1,28 @@
 import { Transcript } from '@/domain/transcript';
 import { encodeWav } from '@/services/audio/wav-encoder';
+import type { EndpointResolver } from './endpoint-resolver';
 import type { Transcriber } from './transcriber';
-
-/** murmuria server endpoint. Must match the running murmuria instance's port. */
-export const MURMURIA_ENDPOINT = 'http://localhost:8771';
 
 const SAMPLE_RATE = 16000;
 
 export interface MurmuriaTranscriptionConfig {
-  readonly endpoint: string;
+  readonly discovery: EndpointResolver;
   readonly language: string;
 }
 
 /**
  * Transcriber backed by the local murmuria server. The offscreen document
  * decodes the Opus audio to PCM, this wraps it as WAV and POSTs to the server's
- * /inference endpoint. The fetch works cross-origin because the extension holds
- * host_permissions for the localhost endpoint (no server CORS).
+ * /inference endpoint. The server address is resolved lazily via discovery; if a
+ * POST fails because the server is unreachable (it moved or restarted), the
+ * cached address is dropped and discovery runs once more before giving up.
  */
 export class MurmuriaTranscriptionService implements Transcriber {
-  private readonly endpoint: string;
+  private readonly discovery: EndpointResolver;
   private readonly language: string;
 
   constructor(config: MurmuriaTranscriptionConfig) {
-    this.endpoint = config.endpoint;
+    this.discovery = config.discovery;
     this.language = config.language;
   }
 
@@ -32,6 +31,19 @@ export class MurmuriaTranscriptionService implements Transcriber {
   }
 
   async transcribe(samples: Float32Array): Promise<Transcript> {
+    const form = this.buildForm(samples);
+    try {
+      return await this.post(await this.discovery.resolve(), form);
+    } catch (error) {
+      if (!isServerUnreachable(error)) {
+        throw error;
+      }
+      await this.discovery.forget();
+      return this.post(await this.discovery.resolve(), form);
+    }
+  }
+
+  private buildForm(samples: Float32Array): FormData {
     const form = new FormData();
     form.append(
       'file',
@@ -41,12 +53,15 @@ export class MurmuriaTranscriptionService implements Transcriber {
     form.append('language', this.language);
     form.append('temperature', '0');
     form.append('response_format', 'json');
+    return form;
+  }
 
+  private async post(endpoint: string, form: FormData): Promise<Transcript> {
     const startedAt = performance.now();
-    const response = await fetch(`${this.endpoint}/inference`, { method: 'POST', body: form });
+    const response = await fetch(`${endpoint}/inference`, { method: 'POST', body: form });
     if (!response.ok) {
       throw new Error(
-        `murmuria respondeu ${response.status} — o servidor está rodando em ${this.endpoint}?`,
+        `murmuria respondeu ${response.status} — verifique o servidor em ${endpoint}.`,
       );
     }
 
@@ -59,4 +74,9 @@ export class MurmuriaTranscriptionService implements Transcriber {
       durationMs: performance.now() - startedAt,
     });
   }
+}
+
+/** A `fetch` that rejects (rather than returning a response) means the host could not be reached. */
+function isServerUnreachable(error: unknown): boolean {
+  return error instanceof TypeError;
 }

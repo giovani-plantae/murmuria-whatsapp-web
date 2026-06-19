@@ -41,6 +41,17 @@ Content script detecta o balão e injeta o botão → `whatsapp-main` (MAIN worl
 decriptados → offscreen decodifica (Opus → PCM → WAV) e faz `POST` no murmuria → o texto volta
 pro balão.
 
+### Descoberta do servidor
+
+A extensão acha o murmuria sozinha, sem porta/IP fixos no código. Ela testa, em ordem, o
+último endereço que funcionou → `murmuria.local` (resolvido pelo mDNS do SO, então funciona
+mesmo com o servidor em **outra máquina da LAN**) → `localhost`/`127.0.0.1`. O primeiro que
+responder `GET /health` com `{ "service": "murmuria" }` vence e fica em cache; se o servidor
+sair do ar, ela redescobre no próximo clique.
+
+Para isso o murmuria precisa **anunciar `murmuria.local` via mDNS** e expor o `/health`. Hosts e
+portas testados são ajustáveis no build via `VITE_MURMURIA_HOSTS` e `VITE_MURMURIA_PORTS`.
+
 ## Scripts
 
 `build` · `dev` · `compile` (tsc) · `test:run` (Vitest) · `format` (Prettier)
