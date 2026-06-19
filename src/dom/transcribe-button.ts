@@ -44,8 +44,12 @@ export class TranscribeButton {
     this.button.addEventListener('click', this.handleClick);
 
     // Inherits the balloon's text color; slightly muted so it reads as a caption.
+    // WhatsApp marks bubbles unselectable, so force selection back on (with
+    // !important to beat any inherited rule) — the transcript must be copyable.
     this.output = document.createElement('div');
-    this.output.style.cssText = 'font-size:13.5px;line-height:1.4;color:inherit;opacity:.92;';
+    this.output.style.cssText =
+      'font-size:13.5px;line-height:1.4;color:inherit;opacity:.92;cursor:text;' +
+      'user-select:text !important;-webkit-user-select:text !important;';
 
     this.root.append(this.button, this.output);
   }
