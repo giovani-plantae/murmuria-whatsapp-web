@@ -28,19 +28,19 @@ class PopupController {
   private async handleTranscribeClick(): Promise<void> {
     const file = this.fileInput.files?.[0];
     if (!file) {
-      this.setStatus('Selecione um arquivo de áudio primeiro.');
+      this.setStatus('Select an audio file first.');
       return;
     }
 
     this.setBusy(true);
     this.transcriptElement.textContent = '';
-    this.setStatus('Transcrevendo… (o modelo pode baixar na primeira vez)');
+    this.setStatus('Transcribing…');
 
     try {
       const response = await this.sendTranscribeRequest(file);
       this.render(response);
     } catch (error) {
-      this.setStatus(`Falha: ${describeError(error)}`);
+      this.setStatus(`Failed: ${describeError(error)}`);
     } finally {
       this.setBusy(false);
     }
@@ -60,16 +60,14 @@ class PopupController {
 
   private render(response: TranscribeResponse): void {
     if (response.kind === 'transcribe-failure') {
-      this.setStatus(`Falha: ${response.message}`);
+      this.setStatus(`Failed: ${response.message}`);
       return;
     }
 
     const { transcript } = response;
     const seconds = (transcript.durationMs / 1000).toFixed(1);
-    this.setStatus(
-      `Pronto em ${seconds}s · ${transcript.device.toUpperCase()} · ${transcript.modelId}`,
-    );
-    this.transcriptElement.textContent = transcript.text || '(silêncio / sem fala detectada)';
+    this.setStatus(`Done in ${seconds}s · ${transcript.modelId}`);
+    this.transcriptElement.textContent = transcript.text || '(no speech detected)';
   }
 
   private setStatus(message: string): void {

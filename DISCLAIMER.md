@@ -23,4 +23,4 @@
    quaisquer danos decorrentes do uso. Veja os termos completos em [LICENSE](LICENSE).
 
 Os riscos técnicos (fragilidade da extração quando o WhatsApp muda) estão descritos
-em **"Riscos conhecidos"** no [README](README.md).
+em **"Risks"** no [README](README.md).

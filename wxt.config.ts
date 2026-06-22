@@ -11,14 +11,10 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   srcDir: 'src',
   manifest: {
-    name: 'WhatsApp Audio → Texto (piloto)',
-    description: 'Transcreve áudios do WhatsApp Web localmente via um servidor murmuria.',
+    name: 'murmuria — WhatsApp Web audio transcription',
+    description: 'Transcribes WhatsApp Web audio locally using a murmuria server on your network.',
     minimum_chrome_version: '116',
     permissions: ['offscreen', 'storage', 'unlimitedStorage'],
-    host_permissions: [
-      'http://localhost/*',
-      'http://127.0.0.1/*',
-      'http://murmuria.local/*',
-    ],
+    host_permissions: ['http://localhost/*', 'http://127.0.0.1/*', 'http://murmuria.local/*'],
   },
 });

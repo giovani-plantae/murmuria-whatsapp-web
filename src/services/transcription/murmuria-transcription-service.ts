@@ -60,9 +60,7 @@ export class MurmuriaTranscriptionService implements Transcriber {
     const startedAt = performance.now();
     const response = await fetch(`${endpoint}/inference`, { method: 'POST', body: form });
     if (!response.ok) {
-      throw new Error(
-        `murmuria respondeu ${response.status} — verifique o servidor em ${endpoint}.`,
-      );
+      throw new Error(`murmuria responded ${response.status} — check the server at ${endpoint}.`);
     }
 
     const payload = (await response.json()) as { text?: string };

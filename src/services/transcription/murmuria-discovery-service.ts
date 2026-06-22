@@ -59,7 +59,7 @@ export class MurmuriaDiscoveryService implements EndpointResolver {
     const reachable = await this.firstReachable(candidates);
     if (!reachable) {
       throw new Error(
-        'Não encontrei o servidor murmuria. Verifique se ele está rodando e anunciando "murmuria.local" na rede.',
+        'Could not find the murmuria server. Make sure it is running and announcing "murmuria.local" on your network.',
       );
     }
 
@@ -74,9 +74,7 @@ export class MurmuriaDiscoveryService implements EndpointResolver {
   }
 
   private async candidateEndpoints(): Promise<string[]> {
-    const grid = this.hosts.flatMap((host) =>
-      this.ports.map((port) => `http://${host}:${port}`),
-    );
+    const grid = this.hosts.flatMap((host) => this.ports.map((port) => `http://${host}:${port}`));
     const lastKnownGood = await this.store.read();
     return unique([lastKnownGood, ...grid].filter((endpoint): endpoint is string => !!endpoint));
   }

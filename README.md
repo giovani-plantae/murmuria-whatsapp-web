@@ -1,66 +1,68 @@
 <div align="center">
 
-# 🎙️ murmuria-whatsapp-web
+<img src="assets/icon.svg" width="120" height="120" alt="murmuria" />
 
-**Áudios do WhatsApp Web em texto, com um clique — no seu próprio servidor.**
+# murmuria-whatsapp-web
+
+**WhatsApp Web audio to text, in one click — on your own server.**
 
 [![CI](https://github.com/giovani-plantae/murmuria-whatsapp-web/actions/workflows/ci.yml/badge.svg)](https://github.com/giovani-plantae/murmuria-whatsapp-web/actions/workflows/ci.yml)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 
 </div>
 
-Extensão MV3 que injeta um botão **"Transcrever"** nos áudios do WhatsApp Web. A transcrição
-roda no seu servidor [**murmuria**](https://github.com/giovani-plantae/murmuria) — o áudio não vai para
-nenhum serviço de terceiros.
+MV3 extension that injects a **"Transcribe"** button into WhatsApp Web audio messages. Transcription
+runs on your own [**murmuria**](https://github.com/giovani-plantae/murmuria) server — the audio never
+goes to any third-party service.
 
-> ⚠️ **Cliente NÃO-OFICIAL, só para fins educacionais.** Usa módulos internos do WhatsApp
-> (engenharia reversa), viola o ToS da Meta e **pode levar a banimento de conta**. Veja o
+> ⚠️ **UNOFFICIAL client, for educational purposes only.** It uses WhatsApp's internal modules
+> (reverse-engineered), violates Meta's ToS, and **may lead to account bans**. See
 > [DISCLAIMER.md](DISCLAIMER.md).
 
-## Requisitos
+## Requirements
 
-- **Node 22+** e o servidor [murmuria](https://github.com/giovani-plantae/murmuria) rodando (`localhost:8771`).
+- **Node 22+** and the [murmuria](https://github.com/giovani-plantae/murmuria) server running (`localhost:8771`).
 
-## Rodando
+## Running
 
 ```bash
 npm install
 npm run build        # → .output/chrome-mv3
 ```
 
-Em `chrome://extensions` (ou `brave://extensions`) → **Modo do desenvolvedor** → **Carregar sem
-compactação** → selecione `.output/chrome-mv3`. Abra o WhatsApp Web e clique em **Transcrever**
-num áudio. Recarregue o card a cada `npm run build`.
+In `chrome://extensions` (or `brave://extensions`) → **Developer mode** → **Load unpacked** → select
+`.output/chrome-mv3`. Open WhatsApp Web and click **Transcribe** on an audio message. Reload the card
+after every `npm run build`.
 
-> `npm run dev` (HMR) precisa de Chrome/Chromium; com só o Brave, use
+> `npm run dev` (HMR) needs Chrome/Chromium; with Brave only, use
 > `CHROME_PATH=/usr/bin/brave-browser npm run dev`.
 
-## Como funciona
+## How it works
 
-Content script detecta o balão e injeta o botão → `whatsapp-main` (MAIN world) extrai os bytes
-decriptados → offscreen decodifica (Opus → PCM → WAV) e faz `POST` no murmuria → o texto volta
-pro balão.
+A content script detects the bubble and injects the button → `whatsapp-main` (MAIN world) extracts the
+decrypted bytes → the offscreen document decodes them (Opus → PCM → WAV) and `POST`s to murmuria → the
+text goes back into the bubble.
 
-### Descoberta do servidor
+### Server discovery
 
-A extensão acha o murmuria sozinha, sem porta/IP fixos no código. Ela testa, em ordem, o
-último endereço que funcionou → `murmuria.local` (resolvido pelo mDNS do SO, então funciona
-mesmo com o servidor em **outra máquina da LAN**) → `localhost`/`127.0.0.1`. O primeiro que
-responder `GET /health` com `{ "service": "murmuria" }` vence e fica em cache; se o servidor
-sair do ar, ela redescobre no próximo clique.
+The extension finds murmuria on its own, with no port/IP hardcoded. It tries, in order, the last
+address that worked → `murmuria.local` (resolved by the OS mDNS, so it works even with the server on
+**another machine on the LAN**) → `localhost`/`127.0.0.1`. The first one to answer `GET /health` with
+`{ "service": "murmuria" }` wins and is cached; if the server goes down, it rediscovers on the next
+click.
 
-Para isso o murmuria precisa **anunciar `murmuria.local` via mDNS** e expor o `/health`. Hosts e
-portas testados são ajustáveis no build via `VITE_MURMURIA_HOSTS` e `VITE_MURMURIA_PORTS`.
+For this, murmuria must **announce `murmuria.local` over mDNS** and expose `/health`. The hosts and
+ports probed are configurable at build time via `VITE_MURMURIA_HOSTS` and `VITE_MURMURIA_PORTS`.
 
 ## Scripts
 
 `build` · `dev` · `compile` (tsc) · `test:run` (Vitest) · `format` (Prettier)
 
-## Riscos
+## Risks
 
-- A extração depende de módulos internos ofuscados do WhatsApp (`WAWeb*`) — quebra quando ele muda.
-- Read-only por design (nunca envia/automatiza), o que reduz mas não zera o risco de banimento.
+- Extraction depends on WhatsApp's obfuscated internal modules (`WAWeb*`) — it breaks when they change.
+- Read-only by design (never sends/automates), which reduces but does not eliminate the ban risk.
 
-## Licença
+## License
 
 [MIT](LICENSE)

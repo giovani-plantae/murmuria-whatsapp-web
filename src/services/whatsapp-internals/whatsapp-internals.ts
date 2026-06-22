@@ -66,7 +66,7 @@ function findMessageByDomId(messageId: string): any {
     );
 
   if (!message) {
-    throw new Error('Mensagem não encontrada na store (role o áudio até a tela e tente de novo).');
+    throw new Error('Message not found in the store (scroll the audio into view and try again).');
   }
   return message;
 }

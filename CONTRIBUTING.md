@@ -1,37 +1,37 @@
-# Contribuindo
+# Contributing
 
-Obrigado pelo interesse! Este é um projeto-piloto — antes de contribuir, leia o
-[DISCLAIMER.md](DISCLAIMER.md) (cliente não-oficial, fins educacionais).
+Thanks for your interest! Before contributing, read
+[DISCLAIMER.md](DISCLAIMER.md) (unofficial client, educational purposes).
 
-## Ambiente
+## Environment
 
-- **Node 22+** (veja [`.nvmrc`](.nvmrc); use `nvm use`).
-- O servidor [**murmuria**](https://github.com/OWNER/murmuria) rodando (repositório separado) para transcrever.
+- **Node 22+** (see [`.nvmrc`](.nvmrc); use `nvm use`).
+- The [**murmuria**](https://github.com/giovani-plantae/murmuria) server running (separate repository) to transcribe.
 
 ```bash
-npm ci          # instala as dependências exatamente como no lockfile
-npm run dev     # ou: npm run build  (veja o README sobre dev vs build)
+npm ci          # install dependencies exactly as in the lockfile
+npm run dev     # or: npm run build  (see the README about dev vs build)
 ```
 
-## Antes de abrir um PR
+## Before opening a PR
 
-Rode os mesmos checks que o CI roda:
+Run the same checks the CI runs:
 
 ```bash
 npm run compile     # tsc --noEmit (type-check)
-npm run test:run    # testes unitários (Vitest)
-npm run build       # build de produção (.output/chrome-mv3)
-npm run format:check # formatação (Prettier)
+npm run test:run    # unit tests (Vitest)
+npm run build       # production build (.output/chrome-mv3)
+npm run format:check # formatting (Prettier)
 ```
 
-- Use `npm run format` para aplicar a formatação automaticamente.
-- Siga o padrão de camadas existente em `src/` (`domain/`, `services/`, `dom/`,
-  `entrypoints/`); `chrome.*` só aparece dentro de `services/` e `entrypoints/`.
-- Mantenha o projeto **read-only** em relação ao WhatsApp (nunca enviar/automatizar).
+- Use `npm run format` to apply formatting automatically.
+- Follow the existing layered structure in `src/` (`domain/`, `services/`, `dom/`,
+  `entrypoints/`); `chrome.*` only appears inside `services/` and `entrypoints/`.
+- Keep the project **read-only** with respect to WhatsApp (never send/automate).
 
-## Testes manuais (extensão real)
+## Manual testing (real extension)
 
-Não há E2E automatizado no CI (precisa de um navegador real + servidor rodando).
-Para testar manualmente: `npm run build`, carregue `.output/chrome-mv3` em
-`chrome://extensions` (ou `brave://extensions`) → "Carregar sem compactação", com o
-servidor murmuria no ar. Detalhes no [README](README.md).
+There is no automated E2E in CI (it needs a real browser + a running server).
+To test manually: `npm run build`, load `.output/chrome-mv3` in
+`chrome://extensions` (or `brave://extensions`) → "Load unpacked", with the
+murmuria server up. Details in the [README](README.md).

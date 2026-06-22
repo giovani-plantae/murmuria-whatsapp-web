@@ -9,7 +9,7 @@ export type TranscribeHandler = (bubble: AudioBubble) => Promise<TranscriptData>
 const WHATSAPP_GREEN = '#00a884';
 
 /**
- * The injected "Transcrever" control plus its result, styled to blend into the
+ * The injected "Transcribe" control plus its result, styled to blend into the
  * WhatsApp balloon: it inherits the bubble's text color (so it works in light and
  * dark themes) and sits under a subtle divider. Once a transcript arrives the
  * button is replaced by the text, so the bubble reads like a native caption.
@@ -37,7 +37,7 @@ export class TranscribeButton {
 
     this.button = document.createElement('button');
     this.button.type = 'button';
-    this.button.textContent = 'Transcrever';
+    this.button.textContent = 'Transcribe';
     this.button.style.cssText =
       `align-self:flex-start;padding:3px 11px;border:none;border-radius:14px;background:${WHATSAPP_GREEN};` +
       'color:#fff;font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;';
@@ -64,14 +64,14 @@ export class TranscribeButton {
     }
 
     this.setBusy(true);
-    this.button.textContent = 'Transcrevendo…';
+    this.button.textContent = 'Transcribing…';
     this.output.textContent = '';
 
     try {
       const transcript = await this.onTranscribe(this.bubble);
       this.renderTranscript(transcript.text);
     } catch (error) {
-      this.button.textContent = 'Transcrever';
+      this.button.textContent = 'Transcribe';
       this.output.textContent = `⚠ ${describeError(error)}`;
     } finally {
       this.setBusy(false);
@@ -80,7 +80,7 @@ export class TranscribeButton {
 
   private renderTranscript(text: string): void {
     this.button.style.display = 'none';
-    this.output.textContent = this.flatten(text) || '(sem fala detectada)';
+    this.output.textContent = this.flatten(text) || '(no speech detected)';
   }
 
   private flatten(text: string): string {

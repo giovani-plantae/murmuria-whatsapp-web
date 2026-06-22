@@ -8,7 +8,7 @@ import type { TranscribeRequest, TranscribeResponse } from '@/services/messaging
 
 /**
  * Runs in WhatsApp Web's isolated world. Watches the (virtualized) message list,
- * detects voice bubbles, and injects a "Transcrever" control next to each. On
+ * detects voice bubbles, and injects a "Transcribe" control next to each. On
  * click it asks the audio-extraction service for the decrypted bytes (via the
  * MAIN-world bridge), routes them through the background → offscreen pipeline,
  * and renders the returned transcript back into the bubble. The extraction leans

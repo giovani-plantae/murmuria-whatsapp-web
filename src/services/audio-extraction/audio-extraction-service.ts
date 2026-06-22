@@ -73,7 +73,7 @@ export class AudioExtractionService {
         sourceId: pending.messageId,
       });
     } else {
-      pending.reject(new Error(response.error ?? 'Falha desconhecida ao extrair o áudio.'));
+      pending.reject(new Error(response.error ?? 'Unknown error while extracting the audio.'));
     }
   }
 
@@ -84,7 +84,7 @@ export class AudioExtractionService {
     }
     this.pending.delete(requestId);
     pending.reject(
-      new Error('Tempo esgotado ao extrair o áudio (os internos do WhatsApp podem ter mudado).'),
+      new Error('Timed out extracting the audio (WhatsApp internals may have changed).'),
     );
   }
 }
