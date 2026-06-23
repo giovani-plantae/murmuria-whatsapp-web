@@ -1,3 +1,5 @@
+import { describeError } from '@/shared/errors';
+import type { CheckHostResult } from '@/services/messaging/messages';
 import type { EndpointResolver } from './endpoint-resolver';
 
 /**
@@ -87,21 +89,72 @@ export class MurmuriaDiscoveryService implements EndpointResolver {
   }
 
   private async probe(endpoint: string): Promise<boolean> {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), this.probeTimeoutMs);
-    try {
-      const response = await this.fetch(`${endpoint}/health`, { signal: controller.signal });
-      if (!response.ok) {
-        return false;
-      }
-      const payload = (await response.json()) as HealthPayload;
-      return payload.service === 'murmuria';
-    } catch {
-      return false;
-    } finally {
-      clearTimeout(timeout);
-    }
+    const result = await probeMurmuriaHealth(endpoint, this.fetch, this.probeTimeoutMs);
+    return result.isMurmuria;
   }
+}
+
+/** Outcome of a single `/health` probe, with enough detail to drive a status UI. */
+export interface HealthProbe {
+  /** The host answered at all (any HTTP status), vs. no connection / timeout. */
+  readonly reachable: boolean;
+  /** The host answered `/health` identifying itself as murmuria. */
+  readonly isMurmuria: boolean;
+  readonly service?: string;
+  readonly latencyMs?: number;
+  readonly error?: string;
+}
+
+/**
+ * Probes `<baseUrl>/health` once, aborting after `timeoutMs`. Never throws —
+ * returns a structured outcome so both discovery (boolean) and the popup's
+ * connection test (full detail + latency) can share one implementation.
+ */
+export async function probeMurmuriaHealth(
+  baseUrl: string,
+  fetchImpl: typeof globalThis.fetch,
+  timeoutMs: number,
+): Promise<HealthProbe> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const startedAt = performance.now();
+  try {
+    const response = await fetchImpl(`${baseUrl}/health`, { signal: controller.signal });
+    const latencyMs = Math.round(performance.now() - startedAt);
+    if (!response.ok) {
+      return { reachable: true, isMurmuria: false, latencyMs, error: `HTTP ${response.status}` };
+    }
+    const payload = (await response.json()) as HealthPayload;
+    return {
+      reachable: true,
+      isMurmuria: payload.service === 'murmuria',
+      service: payload.service,
+      latencyMs,
+    };
+  } catch (error) {
+    return { reachable: false, isMurmuria: false, error: describeError(error) };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+/** Shapes a health probe into the `CheckHostResult` message the popup renders. */
+export function toCheckHostResult(
+  requestId: string,
+  host: string,
+  probe: HealthProbe,
+): CheckHostResult {
+  return {
+    kind: 'check-host-result',
+    requestId,
+    ok: probe.isMurmuria,
+    host,
+    service: probe.service,
+    latencyMs: probe.latencyMs,
+    message: probe.isMurmuria
+      ? undefined
+      : (probe.error ?? (probe.reachable ? 'Reachable, but not a murmuria server.' : undefined)),
+  };
 }
 
 function unique(values: readonly string[]): string[] {

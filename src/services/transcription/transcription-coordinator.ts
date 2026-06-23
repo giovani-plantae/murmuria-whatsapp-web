@@ -3,7 +3,7 @@ import type { Transcript } from '@/domain/transcript';
 import { base64ToArrayBuffer } from '@/services/audio/base64';
 import type { PcmDecoder } from '@/services/audio/audio-decoder';
 import type { SerializedAudioClip } from '@/services/messaging/messages';
-import type { Transcriber } from './transcriber';
+import type { Transcriber, TranscribeOptions } from './transcriber';
 
 export interface TranscriptionCoordinatorConfig {
   readonly decoder: PcmDecoder;
@@ -26,7 +26,7 @@ export class TranscriptionCoordinator {
     this.transcriber = config.transcriber;
   }
 
-  async transcribe(audio: SerializedAudioClip): Promise<Transcript> {
+  async transcribe(audio: SerializedAudioClip, options?: TranscribeOptions): Promise<Transcript> {
     await this.ensureInitialized();
 
     const clip = new AudioClip({
@@ -36,7 +36,7 @@ export class TranscriptionCoordinator {
     });
     const samples = await this.decoder.decodeToMonoPcm(clip.bytes);
 
-    return this.transcriber.transcribe(samples);
+    return this.transcriber.transcribe(samples, options);
   }
 
   private async ensureInitialized(): Promise<void> {

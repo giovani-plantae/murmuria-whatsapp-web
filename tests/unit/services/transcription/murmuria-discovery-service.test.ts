@@ -1,6 +1,8 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   MurmuriaDiscoveryService,
+  probeMurmuriaHealth,
+  toCheckHostResult,
   type EndpointStore,
 } from '@/services/transcription/murmuria-discovery-service';
 
@@ -82,5 +84,87 @@ describe('MurmuriaDiscoveryService', () => {
     const discovery = buildDiscovery(new Set(), store);
 
     await expect(discovery.resolve()).rejects.toThrow(/murmuria/i);
+  });
+});
+
+describe('probeMurmuriaHealth', () => {
+  it('confirms a murmuria server and reports latency', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ service: 'murmuria' }),
+    } as Response);
+
+    const probe = await probeMurmuriaHealth('http://h:8771', fetchImpl, 1000);
+
+    expect(probe).toMatchObject({ reachable: true, isMurmuria: true, service: 'murmuria' });
+    expect(typeof probe.latencyMs).toBe('number');
+    expect(fetchImpl).toHaveBeenCalledWith(
+      'http://h:8771/health',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+  });
+
+  it('flags a host that answers but is not murmuria', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => ({ service: 'other' }) } as Response);
+
+    const probe = await probeMurmuriaHealth('http://h:8771', fetchImpl, 1000);
+
+    expect(probe.reachable).toBe(true);
+    expect(probe.isMurmuria).toBe(false);
+  });
+
+  it('reports unreachable when the request fails', async () => {
+    const fetchImpl = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+
+    const probe = await probeMurmuriaHealth('http://h:8771', fetchImpl, 1000);
+
+    expect(probe.reachable).toBe(false);
+    expect(probe.isMurmuria).toBe(false);
+    expect(probe.error).toBeTruthy();
+  });
+});
+
+describe('toCheckHostResult', () => {
+  it('maps a healthy probe to an ok result with host and latency', () => {
+    const result = toCheckHostResult('r-1', 'http://h:8771', {
+      reachable: true,
+      isMurmuria: true,
+      service: 'murmuria',
+      latencyMs: 42,
+    });
+
+    expect(result).toEqual({
+      kind: 'check-host-result',
+      requestId: 'r-1',
+      ok: true,
+      host: 'http://h:8771',
+      service: 'murmuria',
+      latencyMs: 42,
+      message: undefined,
+    });
+  });
+
+  it('explains a reachable host that is not murmuria', () => {
+    const result = toCheckHostResult('r-2', 'http://h:8771', {
+      reachable: true,
+      isMurmuria: false,
+      service: 'other',
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.message).toMatch(/not a murmuria/i);
+  });
+
+  it('passes through the probe error for an unreachable host', () => {
+    const result = toCheckHostResult('r-3', 'http://h:8771', {
+      reachable: false,
+      isMurmuria: false,
+      error: 'Failed to fetch',
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.message).toBe('Failed to fetch');
   });
 });

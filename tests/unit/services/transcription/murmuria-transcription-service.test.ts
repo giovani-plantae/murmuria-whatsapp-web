@@ -65,4 +65,61 @@ describe('MurmuriaTranscriptionService', () => {
     await expect(service.transcribe(samples)).rejects.toThrow(/500/);
     expect(discovery.forget).not.toHaveBeenCalled();
   });
+
+  it('posts a manual endpoint directly, bypassing discovery', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(okResponse('manual'));
+    vi.stubGlobal('fetch', fetchMock);
+    const discovery: EndpointResolver = {
+      resolve: vi.fn().mockResolvedValue('http://discovered:8771'),
+      forget: vi.fn().mockResolvedValue(undefined),
+    };
+    const service = new MurmuriaTranscriptionService({ discovery, language: 'portuguese' });
+
+    const transcript = await service.transcribe(samples, { endpoint: 'http://manual:9000' });
+
+    expect(transcript.text).toBe('manual');
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://manual:9000/inference',
+      expect.objectContaining({ method: 'POST' }),
+    );
+    expect(discovery.resolve).not.toHaveBeenCalled();
+    expect(discovery.forget).not.toHaveBeenCalled();
+  });
+
+  it('falls back to discovery when the manual endpoint is unreachable', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce(okResponse('via discovery'));
+    vi.stubGlobal('fetch', fetchMock);
+    const discovery: EndpointResolver = {
+      resolve: vi.fn().mockResolvedValue('http://discovered:8771'),
+      forget: vi.fn().mockResolvedValue(undefined),
+    };
+    const service = new MurmuriaTranscriptionService({ discovery, language: 'portuguese' });
+
+    const transcript = await service.transcribe(samples, { endpoint: 'http://manual:9000' });
+
+    expect(transcript.text).toBe('via discovery');
+    expect(fetchMock).toHaveBeenNthCalledWith(1, 'http://manual:9000/inference', expect.anything());
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      'http://discovered:8771/inference',
+      expect.anything(),
+    );
+    expect(discovery.resolve).toHaveBeenCalledOnce();
+  });
+
+  it('honors a per-request language override and otherwise uses the configured default', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(okResponse('x'));
+    vi.stubGlobal('fetch', fetchMock);
+    const discovery: EndpointResolver = {
+      resolve: vi.fn().mockResolvedValue('http://murmuria.local:8771'),
+      forget: vi.fn().mockResolvedValue(undefined),
+    };
+    const service = new MurmuriaTranscriptionService({ discovery, language: 'portuguese' });
+
+    expect((await service.transcribe(samples, { language: 'english' })).language).toBe('english');
+    expect((await service.transcribe(samples)).language).toBe('portuguese');
+  });
 });

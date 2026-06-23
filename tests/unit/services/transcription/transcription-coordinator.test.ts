@@ -32,8 +32,22 @@ describe('TranscriptionCoordinator', () => {
     const result = await coordinator.transcribe(clipOf([1, 2, 3]));
 
     expect(decoder.decodeToMonoPcm).toHaveBeenCalledOnce();
-    expect(transcriber.transcribe).toHaveBeenCalledWith(expect.any(Float32Array));
+    expect(transcriber.transcribe).toHaveBeenCalledWith(expect.any(Float32Array), undefined);
     expect(result.text).toBe('oi');
+  });
+
+  it('forwards per-request options (language, endpoint) to the transcriber', async () => {
+    const { coordinator, transcriber } = buildCoordinator();
+
+    await coordinator.transcribe(clipOf([1, 2, 3]), {
+      language: 'english',
+      endpoint: 'http://host:1',
+    });
+
+    expect(transcriber.transcribe).toHaveBeenCalledWith(expect.any(Float32Array), {
+      language: 'english',
+      endpoint: 'http://host:1',
+    });
   });
 
   it('initializes the transcriber only once across requests', async () => {

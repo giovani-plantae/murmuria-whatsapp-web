@@ -1,7 +1,7 @@
 import { Transcript } from '@/domain/transcript';
 import { encodeWav } from '@/services/audio/wav-encoder';
 import type { EndpointResolver } from './endpoint-resolver';
-import type { Transcriber } from './transcriber';
+import type { Transcriber, TranscribeOptions } from './transcriber';
 
 const SAMPLE_RATE = 16000;
 
@@ -30,33 +30,49 @@ export class MurmuriaTranscriptionService implements Transcriber {
     // Stateless: the model lives on the murmuria server. Nothing to warm up.
   }
 
-  async transcribe(samples: Float32Array): Promise<Transcript> {
-    const form = this.buildForm(samples);
+  async transcribe(samples: Float32Array, options: TranscribeOptions = {}): Promise<Transcript> {
+    const language = options.language ?? this.language;
+    const form = this.buildForm(samples, language);
+
+    // A manually configured host is tried first, with no probing. If it is
+    // unreachable (it moved, or its optional host-permission was revoked), fall
+    // back to auto-discovery instead of a hard, unrecoverable failure.
+    if (options.endpoint) {
+      try {
+        return await this.post(options.endpoint, form, language);
+      } catch (error) {
+        if (!isServerUnreachable(error)) {
+          throw error;
+        }
+        return this.post(await this.discovery.resolve(), form, language);
+      }
+    }
+
     try {
-      return await this.post(await this.discovery.resolve(), form);
+      return await this.post(await this.discovery.resolve(), form, language);
     } catch (error) {
       if (!isServerUnreachable(error)) {
         throw error;
       }
       await this.discovery.forget();
-      return this.post(await this.discovery.resolve(), form);
+      return this.post(await this.discovery.resolve(), form, language);
     }
   }
 
-  private buildForm(samples: Float32Array): FormData {
+  private buildForm(samples: Float32Array, language: string): FormData {
     const form = new FormData();
     form.append(
       'file',
       new Blob([encodeWav(samples, SAMPLE_RATE)], { type: 'audio/wav' }),
       'audio.wav',
     );
-    form.append('language', this.language);
+    form.append('language', language);
     form.append('temperature', '0');
     form.append('response_format', 'json');
     return form;
   }
 
-  private async post(endpoint: string, form: FormData): Promise<Transcript> {
+  private async post(endpoint: string, form: FormData, language: string): Promise<Transcript> {
     const startedAt = performance.now();
     const response = await fetch(`${endpoint}/inference`, { method: 'POST', body: form });
     if (!response.ok) {
@@ -66,7 +82,7 @@ export class MurmuriaTranscriptionService implements Transcriber {
     const payload = (await response.json()) as { text?: string };
     return new Transcript({
       text: (payload.text ?? '').trim(),
-      language: this.language,
+      language,
       modelId: 'murmuria',
       device: 'murmuria',
       durationMs: performance.now() - startedAt,

@@ -24,6 +24,10 @@ export interface TranscribeRequest {
   readonly target: MessageTarget;
   readonly requestId: string;
   readonly audio: SerializedAudioClip;
+  /** Forced transcription language for this request; falls back to the configured default when omitted. */
+  readonly language?: string;
+  /** Server base URL to use instead of auto-discovery; injected by the background router from the user's manual host. */
+  readonly endpoint?: string;
 }
 
 export interface TranscribeSuccess {
@@ -40,10 +44,36 @@ export interface TranscribeFailure {
 
 export type TranscribeResponse = TranscribeSuccess | TranscribeFailure;
 
-export type ExtensionMessage = TranscribeRequest;
+/**
+ * Asks a context with network access to probe a murmuria server's `/health`.
+ * With `url` set it probes that exact host; without it, the offscreen document
+ * resolves the current auto-discovered server and probes the winner.
+ */
+export interface CheckHostRequest {
+  readonly kind: 'check-host';
+  readonly target: MessageTarget;
+  readonly requestId: string;
+  readonly url?: string;
+}
+
+export interface CheckHostResult {
+  readonly kind: 'check-host-result';
+  readonly requestId: string;
+  readonly ok: boolean;
+  readonly host?: string;
+  readonly service?: string;
+  readonly latencyMs?: number;
+  readonly message?: string;
+}
+
+export type ExtensionMessage = TranscribeRequest | CheckHostRequest;
 
 export function isTranscribeRequest(value: unknown): value is TranscribeRequest {
   return isRecord(value) && value.kind === 'transcribe-request';
+}
+
+export function isCheckHostRequest(value: unknown): value is CheckHostRequest {
+  return isRecord(value) && value.kind === 'check-host';
 }
 
 export function isAddressedTo(value: unknown, target: MessageTarget): boolean {

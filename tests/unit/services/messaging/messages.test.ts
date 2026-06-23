@@ -1,11 +1,22 @@
 import { describe, expect, it } from 'vitest';
-import { isAddressedTo, isTranscribeRequest } from '@/services/messaging/messages';
+import {
+  isAddressedTo,
+  isCheckHostRequest,
+  isTranscribeRequest,
+} from '@/services/messaging/messages';
 
 const validRequest = {
   kind: 'transcribe-request',
   target: 'background',
   requestId: 'r-1',
   audio: { base64: 'AA==', mimeType: 'audio/ogg' },
+};
+
+const checkHostRequest = {
+  kind: 'check-host',
+  target: 'background',
+  requestId: 'c-1',
+  url: 'http://murmuria.local:8771',
 };
 
 describe('message guards', () => {
@@ -21,5 +32,11 @@ describe('message guards', () => {
   it('matches the addressed target', () => {
     expect(isAddressedTo(validRequest, 'background')).toBe(true);
     expect(isAddressedTo(validRequest, 'offscreen')).toBe(false);
+  });
+
+  it('recognizes a check-host request and does not confuse it with a transcribe request', () => {
+    expect(isCheckHostRequest(checkHostRequest)).toBe(true);
+    expect(isCheckHostRequest(validRequest)).toBe(false);
+    expect(isTranscribeRequest(checkHostRequest)).toBe(false);
   });
 });
