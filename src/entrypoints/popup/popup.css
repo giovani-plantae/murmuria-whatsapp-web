@@ -295,8 +295,10 @@ button {
 }
 
 .combo__list {
+  /* Open upward, over the (always-tall) drop zone: opening downward would
+     overflow the short idle content and make the auto-sized popup grow taller. */
   position: absolute;
-  top: calc(100% + 6px);
+  bottom: calc(100% + 6px);
   right: 0;
   min-width: 100%;
   margin: 0;
