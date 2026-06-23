@@ -47,7 +47,7 @@ class PopupController {
   private readonly drop = el<HTMLElement>('drop');
   private readonly fileInput = el<HTMLInputElement>('file');
   private readonly chooseButton = el<HTMLButtonElement>('choose');
-  private readonly langSelect = el<HTMLSelectElement>('lang');
+  private readonly langRoot = el<HTMLElement>('lang');
   private readonly recordButton = el<HTMLButtonElement>('record');
   private readonly recordLabel = el<HTMLElement>('record-label');
   private readonly result = el<HTMLElement>('result');
@@ -64,7 +64,11 @@ class PopupController {
     this.onDragOver = this.onDragOver.bind(this);
     this.onDragLeave = this.onDragLeave.bind(this);
     this.onDrop = this.onDrop.bind(this);
-    this.onLanguageChange = this.onLanguageChange.bind(this);
+    this.toggleLang = this.toggleLang.bind(this);
+    this.onTriggerKey = this.onTriggerKey.bind(this);
+    this.onListKey = this.onListKey.bind(this);
+    this.onOptionClick = this.onOptionClick.bind(this);
+    this.onDocClick = this.onDocClick.bind(this);
     this.onRecordClick = this.onRecordClick.bind(this);
     this.toggleServer = this.toggleServer.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
@@ -72,6 +76,7 @@ class PopupController {
   }
 
   async start(): Promise<void> {
+    this.language = await this.readLanguage();
     this.buildLanguageSelect();
     this.buildServerPanel();
     this.renderIdle();
@@ -83,17 +88,15 @@ class PopupController {
     this.drop.addEventListener('drop', this.onDrop);
     this.fileInput.addEventListener('change', this.onFileChange);
     this.chooseButton.addEventListener('click', this.pickFile);
-    this.langSelect.addEventListener('change', this.onLanguageChange);
     this.recordButton.addEventListener('click', this.onRecordClick);
     this.conn.addEventListener('click', this.toggleServer);
+    document.addEventListener('click', this.onDocClick);
 
     if (!RecorderService.isSupported()) {
       this.recordButton.disabled = true;
       this.recordButton.title = 'Recording is not supported in this browser.';
     }
 
-    this.language = await this.readLanguage();
-    this.langSelect.value = this.language;
     void this.checkConnection();
   }
 
@@ -157,17 +160,126 @@ class PopupController {
     await this.sendTranscribe({ base64, mimeType: file.type || 'audio/ogg', sourceId: file.name });
   }
 
-  // ---- language ----
+  // ---- language: a custom listbox (native <select> can't be themed for dark) ----
 
   private buildLanguageSelect(): void {
-    this.langSelect.innerHTML = LANGUAGES.map(
-      (language) => `<option value="${language.value}">${language.label}</option>`,
-    ).join('');
+    const current = LANGUAGES.find((language) => language.value === this.language);
+    this.langRoot.innerHTML =
+      `<button class="combo__trigger" id="lang-trigger" type="button" aria-haspopup="listbox" ` +
+      `aria-expanded="false" aria-labelledby="lang-label lang-current">` +
+      `<span id="lang-current">${current?.label ?? ''}</span>` +
+      `<span class="combo__chevron" aria-hidden="true">▾</span></button>` +
+      `<ul class="combo__list" id="lang-list" role="listbox" tabindex="-1" aria-label="Transcription language" hidden>` +
+      LANGUAGES.map(
+        (language) =>
+          `<li class="combo__option" id="lang-opt-${language.value}" role="option" ` +
+          `data-value="${language.value}" tabindex="-1" aria-selected="${String(language.value === this.language)}">` +
+          `${language.label}</li>`,
+      ).join('') +
+      `</ul>`;
+    const trigger = el<HTMLButtonElement>('lang-trigger');
+    trigger.addEventListener('click', this.toggleLang);
+    trigger.addEventListener('keydown', this.onTriggerKey);
+    const list = el<HTMLElement>('lang-list');
+    list.addEventListener('click', this.onOptionClick);
+    list.addEventListener('keydown', this.onListKey);
   }
 
-  private onLanguageChange(): void {
-    this.language = this.langSelect.value || DEFAULT_LANGUAGE;
+  private setLangOpen(open: boolean): void {
+    el<HTMLElement>('lang-list').hidden = !open;
+    el<HTMLButtonElement>('lang-trigger').setAttribute('aria-expanded', String(open));
+    if (open) {
+      this.focusOption(this.selectedOption() ?? this.langOptions()[0]);
+    }
+  }
+
+  private toggleLang(): void {
+    this.setLangOpen(el<HTMLElement>('lang-list').hidden);
+  }
+
+  private onTriggerKey(event: KeyboardEvent): void {
+    if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) {
+      event.preventDefault();
+      this.setLangOpen(true);
+    }
+  }
+
+  private onListKey(event: KeyboardEvent): void {
+    const options = this.langOptions();
+    const index = options.indexOf(document.activeElement as HTMLElement);
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.focusOption(options[Math.min(index + 1, options.length - 1)]);
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.focusOption(options[Math.max(index - 1, 0)]);
+        break;
+      case 'Home':
+        event.preventDefault();
+        this.focusOption(options[0]);
+        break;
+      case 'End':
+        event.preventDefault();
+        this.focusOption(options[options.length - 1]);
+        break;
+      case 'Enter':
+      case ' ': {
+        event.preventDefault();
+        const value = (document.activeElement as HTMLElement | null)?.dataset.value;
+        if (value) {
+          this.selectLanguage(value);
+        }
+        break;
+      }
+      case 'Escape':
+      case 'Tab':
+        this.closeLang();
+        break;
+    }
+  }
+
+  private onOptionClick(event: MouseEvent): void {
+    const value = (event.target as Element | null)?.closest<HTMLElement>('.combo__option')?.dataset
+      .value;
+    if (value) {
+      this.selectLanguage(value);
+    }
+  }
+
+  private onDocClick(event: MouseEvent): void {
+    if (!el<HTMLElement>('lang-list').hidden && !this.langRoot.contains(event.target as Node)) {
+      this.setLangOpen(false);
+    }
+  }
+
+  private selectLanguage(value: string): void {
+    this.language = value || DEFAULT_LANGUAGE;
+    el<HTMLElement>('lang-current').textContent =
+      LANGUAGES.find((language) => language.value === this.language)?.label ?? '';
+    this.langOptions().forEach((option) =>
+      option.setAttribute('aria-selected', String(option.dataset.value === this.language)),
+    );
     void browser.storage?.local?.set({ [LANGUAGE_KEY]: this.language });
+    this.closeLang();
+  }
+
+  private closeLang(): void {
+    this.setLangOpen(false);
+    el<HTMLButtonElement>('lang-trigger').focus();
+  }
+
+  private langOptions(): HTMLElement[] {
+    return Array.from(el<HTMLElement>('lang-list').querySelectorAll<HTMLElement>('.combo__option'));
+  }
+
+  private selectedOption(): HTMLElement | undefined {
+    return this.langOptions().find((option) => option.dataset.value === this.language);
+  }
+
+  private focusOption(option: HTMLElement | undefined): void {
+    option?.focus();
   }
 
   private async readLanguage(): Promise<string> {

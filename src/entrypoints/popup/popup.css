@@ -267,26 +267,16 @@ button {
   text-transform: uppercase;
 }
 
-.select {
+.combo {
   position: relative;
   display: inline-flex;
 }
 
-.select::after {
-  content: '▾';
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--muted);
-  font-size: 11px;
-  pointer-events: none;
-}
-
-.select select {
-  appearance: none;
-  -webkit-appearance: none;
-  padding: 7px 26px 7px 11px;
+.combo__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px 7px 11px;
   border: 1px solid var(--line);
   border-radius: 9px;
   background: var(--elev);
@@ -295,12 +285,65 @@ button {
   cursor: pointer;
 }
 
-.select select:hover {
+.combo__trigger:hover {
   border-color: rgba(20, 184, 166, 0.4);
 }
 
-.select option {
-  color: #0b1020;
+.combo__chevron {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.combo__list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 100%;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--elev);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.75);
+  z-index: 6;
+}
+
+.combo__list[hidden] {
+  display: none;
+}
+
+.combo__option {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px 8px 8px;
+  border-radius: 7px;
+  color: var(--muted);
+  font: 500 13px/1.2 inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.combo__option::before {
+  content: '✓';
+  width: 16px;
+  color: var(--teal);
+  opacity: 0;
+}
+
+.combo__option:hover,
+.combo__option:focus-visible {
+  outline: none;
+  background: var(--panel);
+  color: var(--text);
+}
+
+.combo__option[aria-selected='true'] {
+  color: var(--text);
+}
+
+.combo__option[aria-selected='true']::before {
+  opacity: 1;
 }
 
 /* ---- result ---- */
