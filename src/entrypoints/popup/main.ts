@@ -489,9 +489,7 @@ class PopupController {
 
   private isInteractive(target: EventTarget | null): boolean {
     return (
-      target instanceof Element &&
-      !!target.closest('.split, .actions button') &&
-      target !== this.drop
+      target instanceof Element && !!target.closest('.actions, .langbar') && target !== this.drop
     );
   }
 }

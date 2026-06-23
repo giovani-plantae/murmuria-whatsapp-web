@@ -78,16 +78,9 @@
           />
         </svg>
         <p class="drop__title">Drop an audio file</p>
-        <p class="drop__hint">or pick one — and choose the language</p>
+        <p class="drop__hint">or pick one, or record from your mic</p>
         <div class="actions">
-          <div class="split">
-            <button class="btn btn--primary split__main" id="choose" type="button">
-              Choose file
-            </button>
-            <span class="split__lang">
-              <select id="lang" class="split__select" aria-label="Transcription language"></select>
-            </span>
-          </div>
+          <button class="btn btn--primary" id="choose" type="button">Choose file</button>
           <button
             class="btn btn--record"
             id="record"
@@ -98,6 +91,12 @@
             <span class="rec-dot" aria-hidden="true"></span>
             <span id="record-label">Record</span>
           </button>
+        </div>
+        <div class="langbar">
+          <span class="langbar__label">Language</span>
+          <span class="select">
+            <select id="lang" aria-label="Transcription language"></select>
+          </span>
         </div>
       </section>
 

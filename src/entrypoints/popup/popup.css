@@ -247,47 +247,59 @@ button {
   cursor: not-allowed;
 }
 
-/* ---- split button + language menu ---- */
-.split {
+/* ---- language selector (a setting, not an action button) ---- */
+.langbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 13px;
+}
+
+.langbar__label {
+  color: var(--muted);
+  font:
+    600 11px/1 ui-monospace,
+    'SF Mono',
+    Menlo,
+    monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.select {
   position: relative;
   display: inline-flex;
 }
 
-.split__main {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.split__lang {
-  position: relative;
-  display: inline-flex;
-}
-
-.split__lang::after {
+.select::after {
   content: '▾';
   position: absolute;
-  right: 9px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: #fff;
+  color: var(--muted);
   font-size: 11px;
   pointer-events: none;
 }
 
-.split__select {
+.select select {
   appearance: none;
   -webkit-appearance: none;
-  padding: 10px 24px 10px 11px;
-  border: none;
-  border-radius: 0 10px 10px 0;
-  background: var(--grad);
-  color: #fff;
+  padding: 7px 26px 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--elev);
+  color: var(--text);
   font: 600 13px/1 inherit;
   cursor: pointer;
-  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.22);
 }
 
-.split__select option {
+.select select:hover {
+  border-color: rgba(20, 184, 166, 0.4);
+}
+
+.select option {
   color: #0b1020;
 }
 
