@@ -4,62 +4,107 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>murmuria — WhatsApp Web audio transcription</title>
-    <style>
-      :root {
-        color-scheme: light dark;
-        font-family:
-          system-ui,
-          -apple-system,
-          Segoe UI,
-          Roboto,
-          sans-serif;
-      }
-      body {
-        width: 320px;
-        margin: 0;
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      h1 {
-        font-size: 14px;
-        margin: 0;
-      }
-      button {
-        padding: 8px 12px;
-        border: none;
-        border-radius: 6px;
-        background: #128c7e;
-        color: #fff;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      button:disabled {
-        opacity: 0.6;
-        cursor: progress;
-      }
-      #status {
-        font-size: 12px;
-        opacity: 0.8;
-        min-height: 16px;
-      }
-      #transcript {
-        font-size: 13px;
-        line-height: 1.4;
-        white-space: pre-wrap;
-        border-left: 3px solid #128c7e;
-        padding-left: 8px;
-        min-height: 16px;
-      }
-    </style>
   </head>
   <body>
-    <h1>murmuria — WhatsApp Web audio transcription</h1>
-    <input id="audio-file" type="file" accept="audio/*" />
-    <button id="transcribe-button" type="button">Transcribe</button>
-    <div id="status"></div>
-    <div id="transcript"></div>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <svg class="brand__mark" viewBox="0 0 128 128" aria-hidden="true">
+            <defs>
+              <linearGradient
+                id="hdrTile"
+                x1="0"
+                y1="0"
+                x2="128"
+                y2="128"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop offset="0" stop-color="#6366F1" />
+                <stop offset="0.5" stop-color="#4F46E5" />
+                <stop offset="1" stop-color="#14B8A6" />
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="128" height="128" rx="29" fill="url(#hdrTile)" />
+            <g fill="#ffffff">
+              <rect x="18" y="22" width="92" height="62" rx="17" />
+              <path d="M 34 82 Q 20 100 24 101 Q 40 94 58 82 Z" />
+            </g>
+            <g fill="url(#hdrTile)">
+              <rect x="34.86" y="60.46" width="5.14" height="10.54" rx="2.57" />
+              <rect x="43.72" y="48.68" width="5.14" height="22.32" rx="2.57" />
+              <rect x="52.57" y="40" width="5.14" height="22" rx="2.57" />
+              <rect x="61.43" y="57.36" width="5.14" height="13.64" rx="2.57" />
+              <rect x="70.29" y="40" width="5.14" height="22" rx="2.57" />
+              <rect x="79.15" y="48.68" width="5.14" height="22.32" rx="2.57" />
+              <rect x="88" y="60.46" width="5.14" height="10.54" rx="2.57" />
+            </g>
+          </svg>
+          <span class="brand__name">murmuria</span>
+        </div>
+        <button
+          class="conn"
+          id="conn"
+          type="button"
+          aria-expanded="false"
+          aria-controls="server"
+          aria-label="Server connection — toggle settings"
+        >
+          <span class="conn__dot" id="conn-dot" data-state="checking"></span>
+          <span id="conn-label" role="status">Checking…</span>
+        </button>
+      </header>
+
+      <section
+        class="drop"
+        id="drop"
+        role="button"
+        tabindex="0"
+        aria-label="Choose an audio file to transcribe"
+      >
+        <input id="file" type="file" accept="audio/*" hidden />
+        <svg class="drop__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M12 15V4m0 0 4 4m-4-4-4 4"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M4 14v3a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-3"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+        <p class="drop__title">Drop an audio file</p>
+        <p class="drop__hint">or pick one — and choose the language</p>
+        <div class="actions">
+          <div class="split">
+            <button class="btn btn--primary split__main" id="choose" type="button">
+              Choose file
+            </button>
+            <span class="split__lang">
+              <select id="lang" class="split__select" aria-label="Transcription language"></select>
+            </span>
+          </div>
+          <button
+            class="btn btn--record"
+            id="record"
+            type="button"
+            aria-pressed="false"
+            aria-label="Record from the microphone"
+          >
+            <span class="rec-dot" aria-hidden="true"></span>
+            <span id="record-label">Record</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="result" id="result" aria-live="polite"></section>
+
+      <section class="server" id="server" aria-label="Server settings" hidden></section>
+    </div>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>
