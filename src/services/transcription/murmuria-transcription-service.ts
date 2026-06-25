@@ -76,7 +76,10 @@ export class MurmuriaTranscriptionService implements Transcriber {
     const startedAt = performance.now();
     const response = await fetch(`${endpoint}/inference`, { method: 'POST', body: form });
     if (!response.ok) {
-      throw new Error(`murmuria responded ${response.status} — check the server at ${endpoint}.`);
+      const reason = await readServerError(response);
+      throw new Error(
+        `murmuria responded ${response.status}${reason ? ` (${reason})` : ''} — check the server at ${endpoint}.`,
+      );
     }
 
     const payload = (await response.json()) as { text?: string };
@@ -93,4 +96,30 @@ export class MurmuriaTranscriptionService implements Transcriber {
 /** A `fetch` that rejects (rather than returning a response) means the host could not be reached. */
 function isServerUnreachable(error: unknown): boolean {
   return error instanceof TypeError;
+}
+
+/**
+ * Pulls the server's own explanation out of a failed response so the thrown
+ * error names the actual reason (e.g. a rejected or unreadable audio) instead of
+ * a bare status code. Read defensively: a server that sends nothing, or a body
+ * we cannot read, must never mask the original HTTP failure.
+ */
+async function readServerError(response: Response): Promise<string> {
+  try {
+    const body = (await response.text()).trim();
+    if (!body) {
+      return '';
+    }
+    try {
+      const parsed = JSON.parse(body) as { error?: unknown };
+      if (typeof parsed.error === 'string' && parsed.error.trim()) {
+        return parsed.error.trim();
+      }
+    } catch {
+      // Not JSON — fall through and surface the raw text.
+    }
+    return body.slice(0, 200);
+  } catch {
+    return '';
+  }
 }
