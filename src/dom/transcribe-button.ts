@@ -11,8 +11,10 @@ const WHATSAPP_GREEN = '#00a884';
 /**
  * The injected "Transcribe" control plus its result, styled to blend into the
  * WhatsApp balloon: it inherits the bubble's text color (so it works in light and
- * dark themes) and sits under a subtle divider. Once a transcript arrives the
- * button is replaced by the text, so the bubble reads like a native caption.
+ * dark themes) and sits under a subtle divider. The transcript renders below the
+ * button, and the button stays available so a fresh transcription can be forced
+ * on demand. When a `cachedText` is supplied (a transcript restored from a
+ * previous run), the control mounts already showing that text.
  */
 export class TranscribeButton {
   private readonly bubble: AudioBubble;
@@ -22,7 +24,7 @@ export class TranscribeButton {
   private readonly output: HTMLDivElement;
   private busy = false;
 
-  constructor(bubble: AudioBubble, onTranscribe: TranscribeHandler) {
+  constructor(bubble: AudioBubble, onTranscribe: TranscribeHandler, cachedText?: string) {
     this.bubble = bubble;
     this.onTranscribe = onTranscribe;
     this.handleClick = this.handleClick.bind(this);
@@ -52,6 +54,10 @@ export class TranscribeButton {
       'user-select:text !important;-webkit-user-select:text !important;';
 
     this.root.append(this.button, this.output);
+
+    if (cachedText !== undefined) {
+      this.renderTranscript(cachedText);
+    }
   }
 
   mount(parent: HTMLElement): void {
@@ -79,7 +85,9 @@ export class TranscribeButton {
   }
 
   private renderTranscript(text: string): void {
-    this.button.style.display = 'none';
+    // Keep the button visible so a new transcription can be forced; relabel it so
+    // it reads as a re-run rather than a first pass.
+    this.button.textContent = 'Transcribe again';
     this.output.textContent = this.flatten(text) || '(no speech detected)';
   }
 

@@ -5,6 +5,7 @@ import { WhatsAppBubbleScanner } from '@/dom/whatsapp-bubble-scanner';
 import { WHATSAPP_SELECTORS } from '@/dom/whatsapp-selectors';
 import { AudioExtractionService } from '@/services/audio-extraction/audio-extraction-service';
 import type { TranscribeRequest, TranscribeResponse } from '@/services/messaging/messages';
+import { TranscriptCacheService } from '@/services/transcript-cache/transcript-cache-service';
 
 /**
  * Runs in WhatsApp Web's isolated world. Watches the (virtualized) message list,
@@ -18,6 +19,7 @@ import type { TranscribeRequest, TranscribeResponse } from '@/services/messaging
 class WhatsAppContentScript {
   private readonly scanner = new WhatsAppBubbleScanner();
   private readonly extraction = new AudioExtractionService();
+  private readonly cache = new TranscriptCacheService();
   private observer: MutationObserver | null = null;
   private scanScheduled = false;
 
@@ -53,13 +55,20 @@ class WhatsAppContentScript {
 
   private scanNow(): void {
     for (const bubble of this.scanner.scan(document)) {
-      this.injectInto(bubble);
+      void this.injectInto(bubble);
     }
   }
 
-  private injectInto(bubble: AudioBubble): void {
+  /**
+   * Reads any cached transcript first so a bubble re-rendered by WhatsApp (e.g.
+   * after switching chats) comes back showing its text instead of a blank
+   * button. The cache read precedes the DOM mutation, so the remove-and-mount
+   * stays atomic.
+   */
+  private async injectInto(bubble: AudioBubble): Promise<void> {
+    const cached = await this.cache.get(bubble.messageId);
     bubble.element.querySelectorAll(`.${INJECTED_UI_CLASS}`).forEach((node) => node.remove());
-    new TranscribeButton(bubble, this.transcribe).mount(this.resolveAnchor(bubble));
+    new TranscribeButton(bubble, this.transcribe, cached?.text).mount(this.resolveAnchor(bubble));
   }
 
   private resolveAnchor(bubble: AudioBubble): HTMLElement {
@@ -116,6 +125,8 @@ class WhatsAppContentScript {
     if (response.kind === 'transcribe-failure') {
       throw new Error(response.message);
     }
+
+    void this.cache.set(bubble.messageId, response.transcript);
     return response.transcript;
   }
 }

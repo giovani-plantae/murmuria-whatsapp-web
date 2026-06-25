@@ -55,4 +55,18 @@ describe('TranscribeButton', () => {
     await vi.waitFor(() => expect(button.disabled).toBe(false));
     expect(handler).toHaveBeenCalledTimes(1);
   });
+
+  it('mounts showing a cached transcript while keeping the button to re-transcribe', () => {
+    const host = document.createElement('div');
+    const bubble: AudioBubble = { element: host, messageId: 'X', direction: 'incoming' };
+
+    new TranscribeButton(bubble, vi.fn(), 'cached caption').mount(host);
+
+    const root = host.querySelector(`.${INJECTED_UI_CLASS}`) as HTMLElement;
+    const output = root.querySelector('div') as HTMLDivElement;
+    const button = root.querySelector('button') as HTMLButtonElement;
+    expect(output.textContent).toBe('cached caption');
+    expect(button.style.display).not.toBe('none');
+    expect(button.textContent).toBe('Transcribe again');
+  });
 });
