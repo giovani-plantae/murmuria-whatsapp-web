@@ -1,8 +1,8 @@
 export interface CachedTranscript {
-  readonly text: string;
-  readonly language: string;
-  /** When it was cached (epoch ms); lets a future cleanup evict stale entries. */
-  readonly at: number;
+    readonly text: string;
+    readonly language: string;
+    /** When it was cached (epoch ms); lets a future cleanup evict stale entries. */
+    readonly at: number;
 }
 
 /**
@@ -14,41 +14,41 @@ export interface CachedTranscript {
  * away and back instead of having to be requested from the server again.
  */
 export class TranscriptCacheService {
-  private static readonly keyPrefix = 'murmuria.transcript.';
+    private static readonly keyPrefix = 'murmuria.transcript.';
 
-  /** Returns the cached transcript for a message, or null if none is stored. */
-  async get(messageId: string): Promise<CachedTranscript | null> {
-    const area = localStorageArea();
-    if (!area) {
-      return null;
+    /** Returns the cached transcript for a message, or null if none is stored. */
+    async get(messageId: string): Promise<CachedTranscript | null> {
+        const area = localStorageArea();
+        if (!area) {
+            return null;
+        }
+        const key = TranscriptCacheService.keyFor(messageId);
+        const result = await area.get(key);
+        const value = result[key];
+        return isCachedTranscript(value) ? value : null;
     }
-    const key = TranscriptCacheService.keyFor(messageId);
-    const result = await area.get(key);
-    const value = result[key];
-    return isCachedTranscript(value) ? value : null;
-  }
 
-  /** Stores (overwriting any prior value) the transcript for a message. */
-  async set(messageId: string, transcript: { text: string; language: string }): Promise<void> {
-    const value: CachedTranscript = {
-      text: transcript.text,
-      language: transcript.language,
-      at: Date.now(),
-    };
-    await localStorageArea()?.set({ [TranscriptCacheService.keyFor(messageId)]: value });
-  }
+    /** Stores (overwriting any prior value) the transcript for a message. */
+    async set(messageId: string, transcript: { text: string; language: string }): Promise<void> {
+        const value: CachedTranscript = {
+            text: transcript.text,
+            language: transcript.language,
+            at: Date.now(),
+        };
+        await localStorageArea()?.set({ [TranscriptCacheService.keyFor(messageId)]: value });
+    }
 
-  private static keyFor(messageId: string): string {
-    return `${TranscriptCacheService.keyPrefix}${messageId}`;
-  }
+    private static keyFor(messageId: string): string {
+        return `${TranscriptCacheService.keyPrefix}${messageId}`;
+    }
 }
 
 function isCachedTranscript(value: unknown): value is CachedTranscript {
-  return (
-    typeof value === 'object' && value !== null && typeof (value as CachedTranscript).text === 'string'
-  );
+    return (
+        typeof value === 'object' && value !== null && typeof (value as CachedTranscript).text === 'string'
+    );
 }
 
 function localStorageArea() {
-  return browser.storage?.local ?? null;
+    return browser.storage?.local ?? null;
 }

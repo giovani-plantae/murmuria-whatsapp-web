@@ -5,9 +5,9 @@
  * server move.
  */
 export interface EndpointResolver {
-  /** Returns a reachable murmuria base URL, memoizing the result. */
-  resolve(): Promise<string>;
+    /** Returns a reachable murmuria base URL, memoizing the result. */
+    resolve(): Promise<string>;
 
-  /** Drops the memoized address so the next resolve() probes the network again. */
-  forget(): Promise<void>;
+    /** Drops the memoized address so the next resolve() probes the network again. */
+    forget(): Promise<void>;
 }

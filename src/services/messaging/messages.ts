@@ -14,32 +14,32 @@ export type MessageTarget = 'background' | 'offscreen';
  * ArrayBuffer. Voice notes are small enough that the ~33% overhead is negligible.
  */
 export interface SerializedAudioClip {
-  readonly base64: string;
-  readonly mimeType: string;
-  readonly sourceId?: string;
+    readonly base64: string;
+    readonly mimeType: string;
+    readonly sourceId?: string;
 }
 
 export interface TranscribeRequest {
-  readonly kind: 'transcribe-request';
-  readonly target: MessageTarget;
-  readonly requestId: string;
-  readonly audio: SerializedAudioClip;
-  /** Forced transcription language for this request; falls back to the configured default when omitted. */
-  readonly language?: string;
-  /** Server base URL to use instead of auto-discovery; injected by the background router from the user's manual host. */
-  readonly endpoint?: string;
+    readonly kind: 'transcribe-request';
+    readonly target: MessageTarget;
+    readonly requestId: string;
+    readonly audio: SerializedAudioClip;
+    /** Forced transcription language for this request; falls back to the configured default when omitted. */
+    readonly language?: string;
+    /** Server base URL to use instead of auto-discovery; injected by the background router from the user's manual host. */
+    readonly endpoint?: string;
 }
 
 export interface TranscribeSuccess {
-  readonly kind: 'transcribe-success';
-  readonly requestId: string;
-  readonly transcript: TranscriptData;
+    readonly kind: 'transcribe-success';
+    readonly requestId: string;
+    readonly transcript: TranscriptData;
 }
 
 export interface TranscribeFailure {
-  readonly kind: 'transcribe-failure';
-  readonly requestId: string;
-  readonly message: string;
+    readonly kind: 'transcribe-failure';
+    readonly requestId: string;
+    readonly message: string;
 }
 
 export type TranscribeResponse = TranscribeSuccess | TranscribeFailure;
@@ -50,36 +50,36 @@ export type TranscribeResponse = TranscribeSuccess | TranscribeFailure;
  * resolves the current auto-discovered server and probes the winner.
  */
 export interface CheckHostRequest {
-  readonly kind: 'check-host';
-  readonly target: MessageTarget;
-  readonly requestId: string;
-  readonly url?: string;
+    readonly kind: 'check-host';
+    readonly target: MessageTarget;
+    readonly requestId: string;
+    readonly url?: string;
 }
 
 export interface CheckHostResult {
-  readonly kind: 'check-host-result';
-  readonly requestId: string;
-  readonly ok: boolean;
-  readonly host?: string;
-  readonly service?: string;
-  readonly latencyMs?: number;
-  readonly message?: string;
+    readonly kind: 'check-host-result';
+    readonly requestId: string;
+    readonly ok: boolean;
+    readonly host?: string;
+    readonly service?: string;
+    readonly latencyMs?: number;
+    readonly message?: string;
 }
 
 export type ExtensionMessage = TranscribeRequest | CheckHostRequest;
 
 export function isTranscribeRequest(value: unknown): value is TranscribeRequest {
-  return isRecord(value) && value.kind === 'transcribe-request';
+    return isRecord(value) && value.kind === 'transcribe-request';
 }
 
 export function isCheckHostRequest(value: unknown): value is CheckHostRequest {
-  return isRecord(value) && value.kind === 'check-host';
+    return isRecord(value) && value.kind === 'check-host';
 }
 
 export function isAddressedTo(value: unknown, target: MessageTarget): boolean {
-  return isRecord(value) && value.target === target;
+    return isRecord(value) && value.target === target;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
+    return typeof value === 'object' && value !== null;
 }

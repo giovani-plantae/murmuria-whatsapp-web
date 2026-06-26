@@ -1,7 +1,7 @@
 export interface AudioClipData {
-  readonly bytes: ArrayBuffer;
-  readonly mimeType: string;
-  readonly sourceId?: string;
+    readonly bytes: ArrayBuffer;
+    readonly mimeType: string;
+    readonly sourceId?: string;
 }
 
 /**
@@ -11,21 +11,21 @@ export interface AudioClipData {
  * AudioDecoder service.
  */
 export class AudioClip {
-  readonly bytes: ArrayBuffer;
-  readonly mimeType: string;
-  readonly sourceId: string | undefined;
+    readonly bytes: ArrayBuffer;
+    readonly mimeType: string;
+    readonly sourceId: string | undefined;
 
-  constructor(data: AudioClipData) {
-    if (data.bytes.byteLength === 0) {
-      throw new Error('AudioClip requires non-empty audio bytes.');
+    constructor(data: AudioClipData) {
+        if (data.bytes.byteLength === 0) {
+            throw new Error('AudioClip requires non-empty audio bytes.');
+        }
+
+        this.bytes = data.bytes;
+        this.mimeType = data.mimeType;
+        this.sourceId = data.sourceId;
     }
 
-    this.bytes = data.bytes;
-    this.mimeType = data.mimeType;
-    this.sourceId = data.sourceId;
-  }
-
-  get byteLength(): number {
-    return this.bytes.byteLength;
-  }
+    get byteLength(): number {
+        return this.bytes.byteLength;
+    }
 }

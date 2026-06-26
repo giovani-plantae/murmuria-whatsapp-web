@@ -5,35 +5,35 @@
  * env at build time.
  */
 function parseHosts(value: string | undefined, fallback: readonly string[]): string[] {
-  if (!value) {
-    return [...fallback];
-  }
-  return value
-    .split(',')
-    .map((host) => host.trim())
-    .filter(Boolean);
+    if (!value) {
+        return [...fallback];
+    }
+    return value
+        .split(',')
+        .map((host) => host.trim())
+        .filter(Boolean);
 }
 
 function parsePorts(value: string | undefined, fallback: readonly number[]): number[] {
-  if (!value) {
-    return [...fallback];
-  }
-  return value
-    .split(',')
-    .map((port) => Number(port.trim()))
-    .filter((port) => Number.isInteger(port) && port > 0);
+    if (!value) {
+        return [...fallback];
+    }
+    return value
+        .split(',')
+        .map((port) => Number(port.trim()))
+        .filter((port) => Number.isInteger(port) && port > 0);
 }
 
 export const DEFAULT_MURMURIA_HOSTS: readonly string[] = parseHosts(
-  import.meta.env.VITE_MURMURIA_HOSTS,
-  ['murmuria.local', 'localhost', '127.0.0.1'],
+    import.meta.env.VITE_MURMURIA_HOSTS,
+    ['murmuria.local', 'localhost', '127.0.0.1'],
 );
 
 export const DEFAULT_MURMURIA_PORTS: readonly number[] = parsePorts(
-  import.meta.env.VITE_MURMURIA_PORTS,
-  [8771],
+    import.meta.env.VITE_MURMURIA_PORTS,
+    [8771],
 );
 
 export const DISCOVERY_PROBE_TIMEOUT_MS = Number(
-  import.meta.env.VITE_DISCOVERY_PROBE_TIMEOUT_MS ?? 1500,
+    import.meta.env.VITE_DISCOVERY_PROBE_TIMEOUT_MS ?? 1500,
 );

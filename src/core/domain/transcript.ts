@@ -1,10 +1,10 @@
 export interface TranscriptData {
-  readonly text: string;
-  readonly language: string;
-  readonly modelId: string;
-  /** Backend that produced this transcript (e.g. 'murmuria'); useful for diagnostics. */
-  readonly device: string;
-  readonly durationMs: number;
+    readonly text: string;
+    readonly language: string;
+    readonly modelId: string;
+    /** Backend that produced this transcript (e.g. 'murmuria'); useful for diagnostics. */
+    readonly device: string;
+    readonly durationMs: number;
 }
 
 /**
@@ -13,21 +13,21 @@ export interface TranscriptData {
  * which language was forced, which backend ran it, how long inference took).
  */
 export class Transcript {
-  readonly text: string;
-  readonly language: string;
-  readonly modelId: string;
-  readonly device: string;
-  readonly durationMs: number;
+    readonly text: string;
+    readonly language: string;
+    readonly modelId: string;
+    readonly device: string;
+    readonly durationMs: number;
 
-  constructor(data: TranscriptData) {
-    this.text = data.text;
-    this.language = data.language;
-    this.modelId = data.modelId;
-    this.device = data.device;
-    this.durationMs = data.durationMs;
-  }
+    constructor(data: TranscriptData) {
+        this.text = data.text;
+        this.language = data.language;
+        this.modelId = data.modelId;
+        this.device = data.device;
+        this.durationMs = data.durationMs;
+    }
 
-  get isEmpty(): boolean {
-    return this.text.trim().length === 0;
-  }
+    get isEmpty(): boolean {
+        return this.text.trim().length === 0;
+    }
 }

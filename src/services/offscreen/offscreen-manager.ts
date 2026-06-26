@@ -5,39 +5,39 @@
  * not race into a double `createDocument`, so creation is de-duplicated.
  */
 export class OffscreenManager {
-  private readonly url: string;
-  private creating: Promise<void> | null = null;
+    private readonly url: string;
+    private creating: Promise<void> | null = null;
 
-  constructor(url: string) {
-    this.url = url;
-  }
-
-  async ensure(): Promise<void> {
-    if (await this.exists()) {
-      return;
+    constructor(url: string) {
+        this.url = url;
     }
 
-    if (!this.creating) {
-      this.creating = this.create();
+    async ensure(): Promise<void> {
+        if (await this.exists()) {
+            return;
+        }
+
+        if (!this.creating) {
+            this.creating = this.create();
+        }
+
+        try {
+            await this.creating;
+        } finally {
+            this.creating = null;
+        }
     }
 
-    try {
-      await this.creating;
-    } finally {
-      this.creating = null;
+    private async exists(): Promise<boolean> {
+        return chrome.offscreen.hasDocument();
     }
-  }
 
-  private async exists(): Promise<boolean> {
-    return chrome.offscreen.hasDocument();
-  }
-
-  private async create(): Promise<void> {
-    await chrome.offscreen.createDocument({
-      url: this.url,
-      reasons: [chrome.offscreen.Reason.WORKERS],
-      justification:
+    private async create(): Promise<void> {
+        await chrome.offscreen.createDocument({
+            url: this.url,
+            reasons: [chrome.offscreen.Reason.WORKERS],
+            justification:
         'Use the Web Audio API to decode voice-message audio (unavailable in the service worker).',
-    });
-  }
+        });
+    }
 }

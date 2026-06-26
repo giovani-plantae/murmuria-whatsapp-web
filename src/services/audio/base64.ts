@@ -6,24 +6,24 @@ const CHUNK_SIZE = 0x8000;
  * `String.fromCharCode` on large buffers.
  */
 export function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
 
-  for (let offset = 0; offset < bytes.length; offset += CHUNK_SIZE) {
-    const chunk = bytes.subarray(offset, offset + CHUNK_SIZE);
-    binary += String.fromCharCode(...chunk);
-  }
+    for (let offset = 0; offset < bytes.length; offset += CHUNK_SIZE) {
+        const chunk = bytes.subarray(offset, offset + CHUNK_SIZE);
+        binary += String.fromCharCode(...chunk);
+    }
 
-  return btoa(binary);
+    return btoa(binary);
 }
 
 export function base64ToArrayBuffer(base64: string): ArrayBuffer {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
 
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index);
-  }
+    for (let index = 0; index < binary.length; index += 1) {
+        bytes[index] = binary.charCodeAt(index);
+    }
 
-  return bytes.buffer;
+    return bytes.buffer;
 }

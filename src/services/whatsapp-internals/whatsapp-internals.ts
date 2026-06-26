@@ -11,15 +11,15 @@
  *   the decrypted ArrayBuffer; it REQUIRES a `downloadQpl` (logging) object.
  */
 const WHATSAPP_MODULES = {
-  collections: 'WAWebCollections',
-  downloadManager: 'WAWebDownloadManager',
+    collections: 'WAWebCollections',
+    downloadManager: 'WAWebDownloadManager',
 } as const;
 
 const DEFAULT_AUDIO_MIME = 'audio/ogg; codecs=opus';
 
 export interface ExtractedWhatsAppAudio {
-  readonly arrayBuffer: ArrayBuffer;
-  readonly mimeType: string;
+    readonly arrayBuffer: ArrayBuffer;
+    readonly mimeType: string;
 }
 
 /**
@@ -28,55 +28,55 @@ export interface ExtractedWhatsAppAudio {
  * change is easy to diagnose.
  */
 export async function extractWhatsAppAudio(messageId: string): Promise<ExtractedWhatsAppAudio> {
-  const message = findMessageByDomId(messageId);
-  const downloadManager = requireModule(WHATSAPP_MODULES.downloadManager)?.downloadManager;
+    const message = findMessageByDomId(messageId);
+    const downloadManager = requireModule(WHATSAPP_MODULES.downloadManager)?.downloadManager;
 
-  if (typeof downloadManager?.downloadAndMaybeDecrypt !== 'function') {
-    throw new Error('WhatsApp internals changed: downloadAndMaybeDecrypt is unavailable.');
-  }
+    if (typeof downloadManager?.downloadAndMaybeDecrypt !== 'function') {
+        throw new Error('WhatsApp internals changed: downloadAndMaybeDecrypt is unavailable.');
+    }
 
-  const arrayBuffer: ArrayBuffer = await downloadManager.downloadAndMaybeDecrypt({
-    directPath: message.directPath,
-    encFilehash: message.encFilehash,
-    filehash: message.filehash,
-    mediaKey: message.mediaKey,
-    mediaKeyTimestamp: message.mediaKeyTimestamp,
-    type: message.type,
-    signal: new AbortController().signal,
-    downloadQpl: createNoopQpl(),
-  });
+    const arrayBuffer: ArrayBuffer = await downloadManager.downloadAndMaybeDecrypt({
+        directPath: message.directPath,
+        encFilehash: message.encFilehash,
+        filehash: message.filehash,
+        mediaKey: message.mediaKey,
+        mediaKeyTimestamp: message.mediaKeyTimestamp,
+        type: message.type,
+        signal: new AbortController().signal,
+        downloadQpl: createNoopQpl(),
+    });
 
-  return { arrayBuffer, mimeType: message.mimetype || DEFAULT_AUDIO_MIME };
+    return { arrayBuffer, mimeType: message.mimetype || DEFAULT_AUDIO_MIME };
 }
 
 function findMessageByDomId(messageId: string): any {
-  const messageStore = requireModule(WHATSAPP_MODULES.collections)?.Msg;
-  const models: any[] | undefined = messageStore?.getModelsArray?.();
+    const messageStore = requireModule(WHATSAPP_MODULES.collections)?.Msg;
+    const models: any[] | undefined = messageStore?.getModelsArray?.();
 
-  if (!models) {
-    throw new Error('WhatsApp internals changed: message store is unavailable.');
-  }
+    if (!models) {
+        throw new Error('WhatsApp internals changed: message store is unavailable.');
+    }
 
-  const message =
-    models.find((model) => model?.id?.id === messageId) ??
+    const message =
+        models.find((model) => model?.id?.id === messageId) ??
     models.find(
-      (model) =>
-        typeof model?.id?._serialized === 'string' &&
+        (model) =>
+            typeof model?.id?._serialized === 'string' &&
         model.id._serialized.endsWith(`_${messageId}`),
     );
 
-  if (!message) {
-    throw new Error('Message not found in the store (scroll the audio into view and try again).');
-  }
-  return message;
+    if (!message) {
+        throw new Error('Message not found in the store (scroll the audio into view and try again).');
+    }
+    return message;
 }
 
 function requireModule(moduleId: string): any {
-  const requireFn = (window as any).require;
-  if (typeof requireFn !== 'function') {
-    throw new Error('WhatsApp internals changed: window.require is unavailable.');
-  }
-  return requireFn(moduleId);
+    const requireFn = (window as any).require;
+    if (typeof requireFn !== 'function') {
+        throw new Error('WhatsApp internals changed: window.require is unavailable.');
+    }
+    return requireFn(moduleId);
 }
 
 /**
@@ -85,11 +85,11 @@ function requireModule(moduleId: string): any {
  * chainable no-op proxy: any property is a function that returns the proxy.
  */
 function createNoopQpl(): unknown {
-  let proxy: any;
-  const handler: ProxyHandler<() => void> = {
-    get: () => () => proxy,
-    apply: () => proxy,
-  };
-  proxy = new Proxy(function () {}, handler);
-  return proxy;
+    let proxy: any;
+    const handler: ProxyHandler<() => void> = {
+        get: () => () => proxy,
+        apply: () => proxy,
+    };
+    proxy = new Proxy(function () {}, handler);
+    return proxy;
 }

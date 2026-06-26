@@ -1,6 +1,6 @@
 export interface TranscriptionConfig {
-  /** Forced transcription language (e.g. 'portuguese'); avoids language auto-detection drift on short clips. */
-  readonly language: string;
+    /** Forced transcription language (e.g. 'portuguese'); avoids language auto-detection drift on short clips. */
+    readonly language: string;
 }
 
 /**
@@ -9,5 +9,5 @@ export interface TranscriptionConfig {
  * time via VITE_TRANSCRIPTION_LANGUAGE.
  */
 export const DEFAULT_TRANSCRIPTION_CONFIG: TranscriptionConfig = {
-  language: import.meta.env.VITE_TRANSCRIPTION_LANGUAGE ?? 'portuguese',
+    language: import.meta.env.VITE_TRANSCRIPTION_LANGUAGE ?? 'portuguese',
 };

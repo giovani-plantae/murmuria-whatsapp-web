@@ -1,17 +1,17 @@
 import type { SerializedAudioClip } from '@/services/messaging/messages';
 import {
-  BRIDGE_SOURCE,
-  EXTRACT_REQUEST,
-  isExtractResponse,
+    BRIDGE_SOURCE,
+    EXTRACT_REQUEST,
+    isExtractResponse,
 } from '@/services/whatsapp-internals/extraction-bridge';
 
 const EXTRACTION_TIMEOUT_MS = 30_000;
 
 interface PendingExtraction {
-  resolve(clip: SerializedAudioClip): void;
-  reject(error: Error): void;
-  messageId: string;
-  timer: ReturnType<typeof setTimeout>;
+    resolve(clip: SerializedAudioClip): void;
+    reject(error: Error): void;
+    messageId: string;
+    timer: ReturnType<typeof setTimeout>;
 }
 
 /**
@@ -24,67 +24,67 @@ interface PendingExtraction {
  * or missing MAIN-world side surfaces a clear error instead of hanging.
  */
 export class AudioExtractionService {
-  private readonly pending = new Map<string, PendingExtraction>();
-  private listening = false;
+    private readonly pending = new Map<string, PendingExtraction>();
+    private listening = false;
 
-  constructor() {
-    this.handleMessage = this.handleMessage.bind(this);
-  }
-
-  async extract(messageId: string): Promise<SerializedAudioClip> {
-    this.ensureListening();
-    const requestId = crypto.randomUUID();
-
-    return new Promise<SerializedAudioClip>((resolve, reject) => {
-      const timer = setTimeout(() => this.settleTimeout(requestId), EXTRACTION_TIMEOUT_MS);
-      this.pending.set(requestId, { resolve, reject, messageId, timer });
-      window.postMessage(
-        { source: BRIDGE_SOURCE, kind: EXTRACT_REQUEST, requestId, messageId },
-        window.origin,
-      );
-    });
-  }
-
-  private ensureListening(): void {
-    if (!this.listening) {
-      window.addEventListener('message', this.handleMessage);
-      this.listening = true;
-    }
-  }
-
-  private handleMessage(event: MessageEvent): void {
-    if (event.origin !== window.origin || !isExtractResponse(event.data)) {
-      return;
+    constructor() {
+        this.handleMessage = this.handleMessage.bind(this);
     }
 
-    const response = event.data;
-    const pending = this.pending.get(response.requestId);
-    if (!pending) {
-      return;
+    async extract(messageId: string): Promise<SerializedAudioClip> {
+        this.ensureListening();
+        const requestId = crypto.randomUUID();
+
+        return new Promise<SerializedAudioClip>((resolve, reject) => {
+            const timer = setTimeout(() => this.settleTimeout(requestId), EXTRACTION_TIMEOUT_MS);
+            this.pending.set(requestId, { resolve, reject, messageId, timer });
+            window.postMessage(
+                { source: BRIDGE_SOURCE, kind: EXTRACT_REQUEST, requestId, messageId },
+                window.origin,
+            );
+        });
     }
 
-    clearTimeout(pending.timer);
-    this.pending.delete(response.requestId);
-
-    if (response.ok && response.base64) {
-      pending.resolve({
-        base64: response.base64,
-        mimeType: response.mimeType ?? 'audio/ogg; codecs=opus',
-        sourceId: pending.messageId,
-      });
-    } else {
-      pending.reject(new Error(response.error ?? 'Unknown error while extracting the audio.'));
+    private ensureListening(): void {
+        if (!this.listening) {
+            window.addEventListener('message', this.handleMessage);
+            this.listening = true;
+        }
     }
-  }
 
-  private settleTimeout(requestId: string): void {
-    const pending = this.pending.get(requestId);
-    if (!pending) {
-      return;
+    private handleMessage(event: MessageEvent): void {
+        if (event.origin !== window.origin || !isExtractResponse(event.data)) {
+            return;
+        }
+
+        const response = event.data;
+        const pending = this.pending.get(response.requestId);
+        if (!pending) {
+            return;
+        }
+
+        clearTimeout(pending.timer);
+        this.pending.delete(response.requestId);
+
+        if (response.ok && response.base64) {
+            pending.resolve({
+                base64: response.base64,
+                mimeType: response.mimeType ?? 'audio/ogg; codecs=opus',
+                sourceId: pending.messageId,
+            });
+        } else {
+            pending.reject(new Error(response.error ?? 'Unknown error while extracting the audio.'));
+        }
     }
-    this.pending.delete(requestId);
-    pending.reject(
-      new Error('Timed out extracting the audio (WhatsApp internals may have changed).'),
-    );
-  }
+
+    private settleTimeout(requestId: string): void {
+        const pending = this.pending.get(requestId);
+        if (!pending) {
+            return;
+        }
+        this.pending.delete(requestId);
+        pending.reject(
+            new Error('Timed out extracting the audio (WhatsApp internals may have changed).'),
+        );
+    }
 }
