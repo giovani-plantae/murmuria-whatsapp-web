@@ -1,6 +1,6 @@
 {
   "name": "murmuria-whatsapp-web",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Browser extension (MV3) that transcribes WhatsApp Web audio locally using a murmuria server on your network.",
   "type": "module",
   "private": true,

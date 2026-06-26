@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/giovani-plantae/murmuria-whatsapp-web/compare/v0.2.1...v0.2.2) (2026-06-26)
+
+
+### Miscellaneous Chores
+
+* upgrade dev dependencies to latest ([5be0719](https://github.com/giovani-plantae/murmuria-whatsapp-web/commit/5be0719f0310f9cfad17f85f4994e4670ce6f4d1))
+
 ## [0.2.1](https://github.com/giovani-plantae/murmuria-whatsapp-web/compare/v0.2.0...v0.2.1) (2026-06-25)
 
 
