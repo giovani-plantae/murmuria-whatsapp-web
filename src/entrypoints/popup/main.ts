@@ -194,7 +194,7 @@ class PopupController {
     }
 
     private toggleLang(): void {
-        this.setLangOpen(el<HTMLElement>('lang-list').hidden);
+        this.setLangOpen(Boolean(el<HTMLElement>('lang-list').hidden));
     }
 
     private onTriggerKey(event: KeyboardEvent): void {
