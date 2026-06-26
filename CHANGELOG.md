@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.3](https://github.com/giovani-plantae/murmuria-whatsapp-web/compare/v0.2.2...v0.2.3) (2026-06-26)
+
+
+### Bug Fixes
+
+* restore extension icons dropped by the WXT 0.20 publicDir change ([ef4d94f](https://github.com/giovani-plantae/murmuria-whatsapp-web/commit/ef4d94fe4dbea735ee3daf678de518849690e7ee))
+* restore extension icons dropped by the WXT 0.20 publicDir change ([3a7b4c3](https://github.com/giovani-plantae/murmuria-whatsapp-web/commit/3a7b4c3aa8e2d32bd8859d061b902d6564085a88))
+
 ## [0.2.2](https://github.com/giovani-plantae/murmuria-whatsapp-web/compare/v0.2.1...v0.2.2) (2026-06-26)
 
 
