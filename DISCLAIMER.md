@@ -1,26 +1,26 @@
-# Aviso legal / Disclaimer
+# Disclaimer
 
-**Leia antes de usar.**
+**Read before using.**
 
-1. **Projeto independente.** Este é um projeto pessoal/experimental, **sem qualquer
-   afiliação, patrocínio ou endosso** da Meta Platforms, Inc. ou do WhatsApp.
-   "WhatsApp" é marca registrada da Meta, usada aqui apenas de forma **nominativa**
-   para descrever a interoperabilidade.
+1. **Independent project.** This is a personal/experimental project, **with no
+   affiliation, sponsorship, or endorsement** from Meta Platforms, Inc. or
+   WhatsApp. "WhatsApp" is a trademark of Meta, used here only **nominatively**
+   to describe interoperability.
 
-2. **Apenas para fins educacionais e de pesquisa.** O código é publicado para estudo
-   de engenharia de extensões, ASR local (Whisper) e integração com a Web. Não é um
-   produto pronto para uso geral.
+2. **For educational and research purposes only.** The code is published to study
+   extension engineering, local ASR (Whisper), and Web integration. It is not a
+   product ready for general use.
 
-3. **Cliente NÃO-OFICIAL.** A extensão depende de módulos internos, ofuscados e não
-   documentados do WhatsApp Web (obtidos por engenharia reversa). Isso **viola os
-   Termos de Serviço da Meta** e **pode resultar em suspensão ou banimento permanente
-   da sua conta**. Use por sua própria conta e risco. O projeto é mantido em modo
-   _read-only_ (nunca envia mensagens nem automatiza ações) para reduzir — mas não
-   eliminar — esse risco.
+3. **UNOFFICIAL client.** The extension relies on internal, obfuscated, and
+   undocumented WhatsApp Web modules (obtained through reverse engineering). This
+   **violates Meta's Terms of Service** and **may result in the suspension or
+   permanent ban of your account**. Use at your own risk. The project is kept
+   _read-only_ (it never sends messages or automates actions) to reduce — but not
+   eliminate — this risk.
 
-4. **Sem garantias.** O software é fornecido "COMO ESTÁ", sem garantias de qualquer
-   tipo. Os autores não se responsabilizam por banimentos de conta, perda de dados ou
-   quaisquer danos decorrentes do uso. Veja os termos completos em [LICENSE](LICENSE).
+4. **No warranty.** The software is provided "AS IS", without warranties of any
+   kind. The authors are not liable for account bans, data loss, or any damages
+   arising from its use. See the full terms in [LICENSE](LICENSE).
 
-Os riscos técnicos (fragilidade da extração quando o WhatsApp muda) estão descritos
-em **"Risks"** no [README](README.md).
+The technical risks (fragility of the extraction when WhatsApp changes) are
+described under **"Risks"** in the [README](README.md).
