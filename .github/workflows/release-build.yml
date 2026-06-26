@@ -1,0 +1,31 @@
+name: release-build
+
+on:
+  repository_dispatch:
+    types: [release-created]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.tag_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build and zip extension
+        run: npm run zip
+
+      - name: Attach build to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.event.client_payload.tag_name }}" .output/*.zip --clobber
