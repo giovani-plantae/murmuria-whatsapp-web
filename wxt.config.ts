@@ -15,6 +15,9 @@ import { defineConfig } from 'wxt';
 // specific host in.
 export default defineConfig({
   srcDir: 'src',
+  // WXT 0.20 resolves publicDir from the project root (it followed srcDir in
+  // 0.19); point it back at the in-src folder that holds the extension icons.
+  publicDir: 'src/public',
   manifest: {
     name: 'murmuria — WhatsApp Web audio transcription',
     description: 'Transcribes WhatsApp Web audio locally using a murmuria server on your network.',
