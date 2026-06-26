@@ -1,6 +1,6 @@
 import './popup.css';
 import { arrayBufferToBase64 } from '@/services/audio/base64';
-import { describeError } from '@/shared/errors';
+import { describeError } from '@/core/errors';
 import { RecorderService } from '@/services/recording/recorder-service';
 import type { RecorderState } from '@/services/recording/recorder-service';
 import {
@@ -15,7 +15,7 @@ import type {
   TranscribeRequest,
   TranscribeResponse,
 } from '@/services/messaging/messages';
-import type { TranscriptData } from '@/domain/transcript';
+import type { TranscriptData } from '@/core/domain/transcript';
 
 interface Language {
   readonly value: string;

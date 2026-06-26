@@ -1,4 +1,4 @@
-import type { TranscriptData } from '@/domain/transcript';
+import type { TranscriptData } from '@/core/domain/transcript';
 
 /**
  * Identifies which extension context a runtime message is addressed to. Both the

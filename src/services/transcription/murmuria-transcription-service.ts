@@ -1,4 +1,4 @@
-import { Transcript } from '@/domain/transcript';
+import { Transcript } from '@/core/domain/transcript';
 import { encodeWav } from '@/services/audio/wav-encoder';
 import type { EndpointResolver } from './endpoint-resolver';
 import type { Transcriber, TranscribeOptions } from './transcriber';

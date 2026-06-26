@@ -1,4 +1,4 @@
-import type { TranscriptData } from '@/domain/transcript';
+import type { TranscriptData } from '@/core/domain/transcript';
 import { INJECTED_UI_CLASS, TranscribeButton } from '@/dom/transcribe-button';
 import type { AudioBubble } from '@/dom/whatsapp-bubble-scanner';
 import { WhatsAppBubbleScanner } from '@/dom/whatsapp-bubble-scanner';

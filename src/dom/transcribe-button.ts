@@ -1,5 +1,5 @@
-import type { TranscriptData } from '@/domain/transcript';
-import { describeError } from '@/shared/errors';
+import type { TranscriptData } from '@/core/domain/transcript';
+import { describeError } from '@/core/errors';
 import type { AudioBubble } from './whatsapp-bubble-scanner';
 
 export const INJECTED_UI_CLASS = 'wa2t-ui';

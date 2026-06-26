@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { Transcript } from '@/domain/transcript';
+import { Transcript } from '@/core/domain/transcript';
 import { arrayBufferToBase64 } from '@/services/audio/base64';
 import { TranscriptionCoordinator } from '@/services/transcription/transcription-coordinator';
 

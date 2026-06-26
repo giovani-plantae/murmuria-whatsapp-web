@@ -1,5 +1,5 @@
-import { AudioClip } from '@/domain/audio-clip';
-import type { Transcript } from '@/domain/transcript';
+import { AudioClip } from '@/core/domain/audio-clip';
+import type { Transcript } from '@/core/domain/transcript';
 import { base64ToArrayBuffer } from '@/services/audio/base64';
 import type { PcmDecoder } from '@/services/audio/audio-decoder';
 import type { SerializedAudioClip } from '@/services/messaging/messages';

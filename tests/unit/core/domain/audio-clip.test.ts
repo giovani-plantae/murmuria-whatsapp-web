@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AudioClip } from '@/domain/audio-clip';
+import { AudioClip } from '@/core/domain/audio-clip';
 
 describe('AudioClip', () => {
   it('exposes the byte length of the wrapped audio', () => {

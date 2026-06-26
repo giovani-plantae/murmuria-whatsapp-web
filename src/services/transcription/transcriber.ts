@@ -1,4 +1,4 @@
-import type { Transcript } from '@/domain/transcript';
+import type { Transcript } from '@/core/domain/transcript';
 
 /** Per-request overrides; both fall back to the transcriber's configured defaults / discovery. */
 export interface TranscribeOptions {

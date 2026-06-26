@@ -1,4 +1,4 @@
-import { describeError } from '@/shared/errors';
+import { describeError } from '@/core/errors';
 import type { CheckHostResult } from '@/services/messaging/messages';
 import type { EndpointResolver } from './endpoint-resolver';
 

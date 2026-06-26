@@ -1,4 +1,4 @@
-import { describeError } from '@/shared/errors';
+import { describeError } from '@/core/errors';
 
 /**
  * Standalone page whose only job is to obtain the microphone permission. A

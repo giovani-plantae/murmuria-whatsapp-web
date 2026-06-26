@@ -24,7 +24,7 @@ import {
 } from '@/services/transcription/murmuria-discovery-config';
 import { TranscriptionCoordinator } from '@/services/transcription/transcription-coordinator';
 import { DEFAULT_TRANSCRIPTION_CONFIG } from '@/services/transcription/transcription-config';
-import { describeError } from '@/shared/errors';
+import { describeError } from '@/core/errors';
 
 /**
  * Bootstraps the offscreen document. It decodes audio to PCM with the Web Audio

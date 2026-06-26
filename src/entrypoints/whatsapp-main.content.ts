@@ -6,7 +6,7 @@ import {
 } from '@/services/whatsapp-internals/extraction-bridge';
 import type { ExtractResponseMessage } from '@/services/whatsapp-internals/extraction-bridge';
 import { extractWhatsAppAudio } from '@/services/whatsapp-internals/whatsapp-internals';
-import { describeError } from '@/shared/errors';
+import { describeError } from '@/core/errors';
 
 /**
  * Runs in WhatsApp Web's MAIN world — the only place `window.require` and the
