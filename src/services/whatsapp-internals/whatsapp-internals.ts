@@ -1,14 +1,16 @@
 /**
  * THE fragile coupling to WhatsApp Web's internals — everything that breaks when
  * WhatsApp ships a new build lives here, and nowhere else. Verified live on the
- * 2026-05-31 build. Only usable from the MAIN world (it reads `window.require`).
+ * 2026-09-28 build. Only usable from the MAIN world (it reads `window.require`).
  *
  * Recipe (confirmed by pulling a real decrypted OggS ArrayBuffer):
  * - `window.require('WAWebCollections').Msg.getModelsArray()` → all messages.
  * - The DOM bubble's `data-id` equals `msg.id.id` (a bare hash).
  * - Media fields live top-level on the msg.
  * - `WAWebDownloadManager.downloadManager.downloadAndMaybeDecrypt({...})` returns
- *   the decrypted ArrayBuffer; it REQUIRES a `downloadQpl` (logging) object.
+ *   the decrypted ArrayBuffer; it REQUIRES a `downloadQpl` (logging) object and,
+ *   since the 2026-09 builds, the `mimetype` (otherwise it assumes
+ *   application/octet-stream and throws InvalidMediaFileType for voice notes).
  */
 const WHATSAPP_MODULES = {
     collections: 'WAWebCollections',
@@ -42,6 +44,7 @@ export async function extractWhatsAppAudio(messageId: string): Promise<Extracted
         mediaKey: message.mediaKey,
         mediaKeyTimestamp: message.mediaKeyTimestamp,
         type: message.type,
+        mimetype: message.mimetype || DEFAULT_AUDIO_MIME,
         signal: new AbortController().signal,
         downloadQpl: createNoopQpl(),
     });
