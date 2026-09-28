@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/giovani-plantae/murmuria-whatsapp-web/compare/v0.2.3...v0.2.4) (2026-09-28)
+
+
+### Bug Fixes
+
+* pass the message mimetype to WhatsApp's media download ([#11](https://github.com/giovani-plantae/murmuria-whatsapp-web/issues/11)) ([3881536](https://github.com/giovani-plantae/murmuria-whatsapp-web/commit/388153614f98bf171214fa7f291c09bf12d0eaf6))
+
 ## [0.2.3](https://github.com/giovani-plantae/murmuria-whatsapp-web/compare/v0.2.2...v0.2.3) (2026-06-26)
 
 
